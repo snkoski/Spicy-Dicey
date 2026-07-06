@@ -1,6 +1,6 @@
 # Spicy-Dicey — CLAUDE.md
 
-Farkle / Hot Dice platform. The full spec — phased roadmap, acceptance criteria, DB schema, API/socket contracts, and the decision log — lives in `spicy-dicey-project-plan.md` at the repo root. Consult it for *what* to build. This file is for *how to operate* in this repo, every session.
+Farkle / Hot Dice platform. The full spec — phased roadmap, acceptance criteria, DB schema, API/socket contracts, and the decision log — lives in `spicy-dicey-project-plan.md` at the repo root. Consult it for _what_ to build. This file is for _how to operate_ in this repo, every session.
 
 ## Core invariant (never violate)
 
@@ -28,6 +28,7 @@ packages/
   server/        # Fastify + Socket.io; handlers stay thin, delegate to game/
   client/        # React, feature-first folders
 ```
+
 Full tree with subfolders: plan §2.
 
 ## Build & test
@@ -36,6 +37,7 @@ Full tree with subfolders: plan §2.
 pnpm install
 pnpm turbo run typecheck lint test
 ```
+
 This must pass locally before every commit. CI runs the same command and blocks merge on failure — don't rely on CI to catch what you could've caught first.
 
 ## Test discipline
@@ -60,7 +62,7 @@ This must pass locally before every commit. CI runs the same command and blocks 
 
 ## Working notes
 
-- Each phase gets a running notes file at `notes/phase-N-<name>.md`, created when the phase starts. Append to it *as you work* — design decisions and why an approach was chosen over an alternative, edge cases discovered, anything that surprised you or deviated from the plan. Write these in the moment, not as a single end-of-phase summary.
+- Each phase gets a running notes file at `notes/phase-N-<name>.md`, created when the phase starts. Append to it _as you work_ — design decisions and why an approach was chosen over an alternative, edge cases discovered, anything that surprised you or deviated from the plan. Write these in the moment, not as a single end-of-phase summary.
 - Do not duplicate deliverables or acceptance criteria here — those stay in the plan; reference the relevant section instead.
 - Commit notes alongside the code they describe.
 

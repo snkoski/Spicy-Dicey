@@ -1,0 +1,8 @@
+.claude/
+node_modules/
+dist/
+coverage/
+.turbo/
+pnpm-lock.yaml
+playwright-report/
+test-results/
