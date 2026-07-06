@@ -4,7 +4,7 @@ Deliverables/acceptance: plan §1 Phase 1; scoring values: plan Appendix A.1/A.1
 
 ## Kickoff breakdown (module slices, one branch/PR/tag each)
 
-1. [ ] `phase-1/rng-dice` — `RandomSource` interface, seedable mulberry32, `rollDice(rng, n)`. Tests: same seed ⇒ identical sequence; values uniform-ish and in [0,1); dice values 1–6 only, driven by injected RNG.
+1. [x] `phase-1/rng-dice` — `RandomSource` interface, seedable mulberry32, `rollDice(rng, n)`. Tests: same seed ⇒ identical sequence; values uniform-ish and in [0,1); dice values 1–6 only, driven by injected RNG. Replaced the Phase-0 placeholder export/smoke test with the real public API.
 2. [ ] `phase-1/scoring` — ruleset config (all A.1.1 toggles + singles values, defaults from A.1) + scoring: `scoreSelection` (max interpretation, null if any kept die doesn't contribute), `enumerateLegalSelections`, Farkle detection. Table-driven tests for every combo × every toggle; fast-check property tests (≥100k runs nightly knob).
 3. [ ] `phase-1/turn` — pure turn state machine: roll → select → (roll|bank), Farkle/hot-dice transitions, on-the-board gating hooks, running turn score. Machine consumes rolled values (rolling itself stays in dice/game layers so the server can inject CSPRNG rolls).
 4. [ ] `phase-1/strategy` — condition→action rule engine (keep policy + bank policy, first-match-wins, AND/OR), evaluation context (turn state + score differential vs leader + hot-dice streak), built-ins: bank-at-300, greedy, value-aware, EV-optimal (default ruleset table — decision 1).
