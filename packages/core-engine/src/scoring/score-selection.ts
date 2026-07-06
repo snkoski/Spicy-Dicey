@@ -19,7 +19,32 @@ export function scoreSelection(dice: readonly DieValue[], ruleset: RulesetConfig
     candidates.push(faceWise);
   }
 
+  const wholeSet = scoreWholeSet(counts, ruleset);
+  if (wholeSet !== null) {
+    candidates.push(wholeSet);
+  }
+
   return candidates.length > 0 ? Math.max(...candidates) : null;
+}
+
+/**
+ * Whole-multiset combos that only exist as an exact pattern over all six
+ * kept dice: straight, three pairs, two triplets.
+ */
+function scoreWholeSet(counts: ReturnType<typeof toCounts>, ruleset: RulesetConfig): number | null {
+  const pattern = counts.slice(1).filter((n) => n > 0);
+  pattern.sort((a, b) => a - b);
+
+  if (pattern.length === 6) {
+    return ruleset.straightValue; // one of each face
+  }
+  if (pattern.length === 3 && pattern.every((n) => n === 2)) {
+    return ruleset.threePairsValue;
+  }
+  if (ruleset.twoTripletsEnabled && pattern.length === 2 && pattern.every((n) => n === 3)) {
+    return ruleset.twoTripletsValue;
+  }
+  return null;
 }
 
 /**

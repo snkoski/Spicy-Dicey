@@ -98,6 +98,72 @@ describe('scoreSelection — doubling n-of-a-kind scaling (§6 decision 17: 3oak
   });
 });
 
+describe('scoreSelection — straight 1–6 (A.1: 1500)', () => {
+  it('scores the straight over the face-wise reading', () => {
+    // face-wise would be 100 + 50 with four dead dice -> illegal; straight rescues it
+    expect(score([1, 2, 3, 4, 5, 6])).toBe(1500);
+    expect(score([6, 5, 4, 3, 2, 1])).toBe(1500);
+  });
+
+  it('reads the configured straight value', () => {
+    expect(scoreSelection([1, 2, 3, 4, 5, 6], { ...DEFAULT_RULESET, straightValue: 2000 })).toBe(
+      2000,
+    );
+  });
+
+  it('five in a row is not a straight', () => {
+    expect(score([1, 2, 3, 4, 5])).toBeNull();
+    expect(score([2, 3, 4, 5, 6])).toBeNull();
+  });
+});
+
+describe('scoreSelection — three pairs (A.1: 1500; exactly three distinct face pairs)', () => {
+  it.each<[DieValue[]]>([[[2, 2, 3, 3, 4, 4]], [[1, 1, 5, 5, 6, 6]], [[2, 2, 4, 4, 6, 6]]])(
+    '%j scores 1500',
+    (dice) => {
+      expect(score(dice)).toBe(1500);
+    },
+  );
+
+  it('beats the face-wise reading when pairs include 1s and 5s', () => {
+    // face-wise: 200 + 100 but the 3s are dead -> illegal; three pairs applies
+    expect(score([1, 1, 5, 5, 3, 3])).toBe(1500);
+  });
+
+  it('four of a kind plus a pair is NOT three pairs (phase-1 notes decision)', () => {
+    expect(score([2, 2, 2, 2, 3, 3])).toBeNull();
+    // ...but 4oak + scoring pair still scores face-wise
+    expect(score([2, 2, 2, 2, 5, 5])).toBe(1100);
+  });
+
+  it('reads the configured three-pairs value', () => {
+    expect(
+      scoreSelection([2, 2, 3, 3, 4, 4], { ...DEFAULT_RULESET, threePairsValue: 600 }),
+    ).toBe(600);
+  });
+});
+
+describe('scoreSelection — two triplets (A.1.1 #5: on by default, 2500)', () => {
+  it('scores two distinct triplets as the combo when better', () => {
+    // face-wise: 200 + 300 = 500; combo: 2500
+    expect(score([2, 2, 2, 3, 3, 3])).toBe(2500);
+    expect(score([1, 1, 1, 5, 5, 5])).toBe(2500);
+  });
+
+  it('falls back to face-wise when the combo is disabled', () => {
+    const off = { ...DEFAULT_RULESET, twoTripletsEnabled: false };
+    expect(scoreSelection([2, 2, 2, 3, 3, 3], off)).toBe(500);
+    expect(scoreSelection([1, 1, 1, 6, 6, 6], off)).toBe(1600);
+  });
+
+  it('never scores below the face-wise reading (max interpretation)', () => {
+    // face-wise: 1000 + 600 = 1600 < 2500 -> combo wins; but with a cheap
+    // two-triplets config the face-wise reading must win instead
+    const cheap = { ...DEFAULT_RULESET, twoTripletsValue: 800 };
+    expect(scoreSelection([1, 1, 1, 6, 6, 6], cheap)).toBe(1600);
+  });
+});
+
 describe('scoreSelection — illegal selections score null', () => {
   it.each<[DieValue[]]>([
     [[]], // must keep at least one scoring die
