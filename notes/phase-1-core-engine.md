@@ -13,7 +13,7 @@ Deliverables/acceptance: plan §1 Phase 1; scoring values: plan Appendix A.1/A.1
 
 ## Decisions & surprises (append as they happen)
 
-- **Config surface beyond A.1.1:** package CLAUDE.md forbids *any* hardcoded scoring value, so the config also carries `singleOneValue` (100), `singleFiveValue` (50), and `threeOfAKindFaceMultiplier` (100 — three Ns = N×100 for faces 2–6) alongside the nine A.1.1 toggles. Defaults match Appendix A.1 exactly.
+- **Config surface beyond A.1.1:** package CLAUDE.md forbids _any_ hardcoded scoring value, so the config also carries `singleOneValue` (100), `singleFiveValue` (50), and `threeOfAKindFaceMultiplier` (100 — three Ns = N×100 for faces 2–6) alongside the nine A.1.1 toggles. Defaults match Appendix A.1 exactly.
 - **Three pairs = exactly three distinct face-pairs** (counts pattern 2/2/2 over 6 dice). A 4-of-a-kind + pair does **not** count as three pairs — the 4-oak interpretation already exists, and A.1 doesn't sanction 4+2; if a variant wants it later, it's a new config toggle, not a reinterpretation.
 - **Turn machine is pure and takes rolled values as input** (`applyRoll(state, dice)`), never an RNG. Rolling happens in the game runner (sim/tests: seeded PRNG) or the server (CSPRNG) via the same `rollDice` — keeps the "give me N dice" consumption identical for both per plan §6 risk 3.
 - **Greedy never banks voluntarily** ("roll until forced to stop" taken literally), so a greedy-vs-greedy game could never finish; the game runner gets a `maxTurns` safety valve (default generous, configurable) and reports an unfinished result rather than looping forever.
