@@ -40,7 +40,10 @@ describe('applyFarkleToBank (§6 decision 18)', () => {
   });
 
   it('recurs every third consecutive farkle after the reset', () => {
-    const afterThird = applyFarkleToBank({ consecutiveFarkles: 2, bankedTotal: 3000 }, penaltyRules);
+    const afterThird = applyFarkleToBank(
+      { consecutiveFarkles: 2, bankedTotal: 3000 },
+      penaltyRules,
+    );
     expect(afterThird.consecutiveFarkles).toBe(0);
     const fourth = applyFarkleToBank(afterThird, penaltyRules);
     const fifth = applyFarkleToBank(fourth, penaltyRules);
@@ -50,8 +53,8 @@ describe('applyFarkleToBank (§6 decision 18)', () => {
 
   it('reads the configured penalty value', () => {
     const custom = { ...penaltyRules, farkleConsecutivePenalty: 250 };
-    expect(
-      applyFarkleToBank({ consecutiveFarkles: 2, bankedTotal: 100 }, custom).bankedTotal,
-    ).toBe(-150);
+    expect(applyFarkleToBank({ consecutiveFarkles: 2, bankedTotal: 100 }, custom).bankedTotal).toBe(
+      -150,
+    );
   });
 });

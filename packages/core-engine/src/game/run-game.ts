@@ -2,14 +2,7 @@ import { rollDice } from '../dice/roll.js';
 import type { RandomSource } from '../rng/types.js';
 import { chooseStrategySelection } from '../strategy/select.js';
 import { evaluateBankPolicy } from '../strategy/policies.js';
-import {
-  applyRoll,
-  applySelection,
-  bank,
-  canBank,
-  chooseRoll,
-  startTurn,
-} from '../turn/turn.js';
+import { applyRoll, applySelection, bank, canBank, chooseRoll, startTurn } from '../turn/turn.js';
 import { applyFarkleToBank } from './farkle-penalty.js';
 import type { GameConfig, GameLogEvent, GameResult } from './types.js';
 
@@ -76,9 +69,7 @@ export function runGame(config: GameConfig, rng: RandomSource): GameResult {
   }
 
   function playTurn(player: PlayerState, seat: number): void {
-    const bestOther = Math.max(
-      ...players.filter((_, i) => i !== seat).map((p) => p.total),
-    );
+    const bestOther = Math.max(...players.filter((_, i) => i !== seat).map((p) => p.total));
     let state = startTurn();
     for (;;) {
       if (state.phase === 'awaiting-roll') {

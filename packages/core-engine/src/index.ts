@@ -33,3 +33,7 @@ export { evaluateBankPolicy, evaluateKeepPolicy } from './strategy/policies.js';
 export { chooseStrategySelection } from './strategy/select.js';
 export type { StrategyTurnContext } from './strategy/select.js';
 export { BUILTIN_STRATEGIES, getBuiltinStrategy } from './strategy/builtins.js';
+export type { GameConfig, GamePlayerConfig, GameLogEvent, GameResult } from './game/types.js';
+export { runGame } from './game/run-game.js';
+export { applyFarkleToBank } from './game/farkle-penalty.js';
+export type { FarkleBankState, FarkleBankResult } from './game/farkle-penalty.js';

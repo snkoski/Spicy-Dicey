@@ -108,7 +108,10 @@ describe('runGame', () => {
   it('rejects fewer than two players', () => {
     expect(() =>
       runGame(
-        { players: [{ id: 'solo', strategy: getBuiltinStrategy('greedy') }], ruleset: DEFAULT_RULESET },
+        {
+          players: [{ id: 'solo', strategy: getBuiltinStrategy('greedy') }],
+          ruleset: DEFAULT_RULESET,
+        },
         createMulberry32(1),
       ),
     ).toThrow(/players/i);
