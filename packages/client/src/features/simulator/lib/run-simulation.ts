@@ -1,6 +1,7 @@
 import {
   createMulberry32,
   runGame,
+  type GameLogEvent,
   type GameResult,
   type RulesetConfig,
   type StrategyDefinition,
@@ -33,6 +34,8 @@ export interface SimulationResult {
   perStrategy: Record<string, StrategyStats>;
   /** Ranked best-to-worst per decision 8. */
   rankings: string[];
+  /** The first game's full log — drives step-through replay. */
+  sampleGameLog: GameLogEvent[];
   /** Round-robin only. */
   matrix?: RoundRobinMatrix;
 }
@@ -98,7 +101,11 @@ function runHeadToHead(
   const perStrategy = Object.fromEntries(
     participants.map((p) => [p.id, aggregateStrategyStats(games, p.id)]),
   );
-  return { perStrategy, rankings: rank(participants, perStrategy) };
+  return {
+    perStrategy,
+    rankings: rank(participants, perStrategy),
+    sampleGameLog: games[0]?.log ?? [],
+  };
 }
 
 function runRoundRobin(
@@ -114,6 +121,7 @@ function runRoundRobin(
     }
   }
   const totalGames = pairs.length * config.numGames;
+  let sampleGameLog: GameLogEvent[] = [];
   const gamesByParticipant = new Map<string, GameResult[]>(participants.map((p) => [p.id, []]));
   const wins: (number | null)[][] = participants.map((_, i) =>
     participants.map((_, j) => (i === j ? null : 0)),
@@ -124,6 +132,9 @@ function runRoundRobin(
     for (let g = 0; g < config.numGames; g += 1) {
       const seed = config.seed + pairIndex * config.numGames + g;
       const result = playGame([participants[i]!, participants[j]!], config.ruleset, seed, g);
+      if (sampleGameLog.length === 0) {
+        sampleGameLog = result.log;
+      }
       gamesByParticipant.get(participants[i]!.id)!.push(result);
       gamesByParticipant.get(participants[j]!.id)!.push(result);
       if (result.winnerId === participants[i]!.id) {
@@ -142,6 +153,7 @@ function runRoundRobin(
   return {
     perStrategy,
     rankings: rank(participants, perStrategy, { ids: participants.map((p) => p.id), wins }),
+    sampleGameLog,
     matrix: { ids: participants.map((p) => p.id), wins },
   };
 }

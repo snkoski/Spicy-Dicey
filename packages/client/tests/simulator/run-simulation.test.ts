@@ -63,6 +63,16 @@ describe('runSimulation — head-to-head', () => {
   });
 });
 
+describe('runSimulation — sample log for replay', () => {
+  it('exposes the first game log so replay can step through it', () => {
+    const result = runSimulation(config({ numGames: 3 }));
+    expect(result.sampleGameLog.length).toBeGreaterThan(0);
+    expect(result.sampleGameLog.at(-1)!.type).toBe('game-ended');
+    // deterministic: same seed reproduces the same sample
+    expect(runSimulation(config({ numGames: 3 })).sampleGameLog).toEqual(result.sampleGameLog);
+  });
+});
+
 describe('runSimulation — round-robin', () => {
   const rrConfig = config({
     mode: 'round-robin',
