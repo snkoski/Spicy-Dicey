@@ -75,6 +75,29 @@ describe('scoreSelection — 4/5/6 of a kind, flat scaling (A.1 default: 1000/20
   });
 });
 
+describe('scoreSelection — doubling n-of-a-kind scaling (§6 decision 17: 3oak(face) × 2^(n−3))', () => {
+  const doubling = { ...DEFAULT_RULESET, nOfAKindScaling: 'doubling' as const };
+  const scoreDoubling = (dice: DieValue[]) => scoreSelection(dice, doubling);
+
+  it.each<[DieValue[], number]>([
+    // examples straight from the plan appendix
+    [[1, 1, 1, 1], 2000],
+    [[1, 1, 1, 1, 1], 4000],
+    [[1, 1, 1, 1, 1, 1], 8000],
+    [[5, 5, 5, 5], 1000],
+    [[5, 5, 5, 5, 5, 5], 4000],
+    [[2, 2, 2, 2], 400],
+    [[6, 6, 6, 6, 6], 2400],
+  ])('%j scores %d under doubling', (dice, expected) => {
+    expect(scoreDoubling(dice)).toBe(expected);
+  });
+
+  it('three of a kind is unchanged by the scaling toggle', () => {
+    expect(scoreDoubling([4, 4, 4])).toBe(400);
+    expect(scoreDoubling([1, 1, 1])).toBe(1000);
+  });
+});
+
 describe('scoreSelection — illegal selections score null', () => {
   it.each<[DieValue[]]>([
     [[]], // must keep at least one scoring die

@@ -55,6 +55,9 @@ function nOfAKindValue(face: number, n: number, ruleset: RulesetConfig): number 
   if (n === 3) {
     return threeValue;
   }
+  if (ruleset.nOfAKindScaling === 'doubling') {
+    return threeValue * 2 ** (n - 3);
+  }
   if (n === 4) {
     return ruleset.fourOfAKindFlatValue;
   }
