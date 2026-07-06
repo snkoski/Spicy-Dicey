@@ -16,3 +16,20 @@ export type { ScoredSelection } from './scoring/enumerate.js';
 export type { TurnPhase, TurnState } from './turn/types.js';
 export type { TurnContext } from './turn/turn.js';
 export { startTurn, applyRoll, applySelection, chooseRoll, canBank, bank } from './turn/turn.js';
+export type {
+  Comparator,
+  ConditionSubject,
+  ComparisonCondition,
+  CompositeCondition,
+  AlwaysCondition,
+  StrategyCondition,
+  KeepRule,
+  BankRule,
+  StrategyDefinition,
+  ConditionContext,
+} from './strategy/types.js';
+export { evaluateCondition } from './strategy/conditions.js';
+export { evaluateBankPolicy, evaluateKeepPolicy } from './strategy/policies.js';
+export { chooseStrategySelection } from './strategy/select.js';
+export type { StrategyTurnContext } from './strategy/select.js';
+export { BUILTIN_STRATEGIES, getBuiltinStrategy } from './strategy/builtins.js';
