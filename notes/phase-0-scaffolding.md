@@ -12,12 +12,12 @@ Deliverables/acceptance: plan §1 Phase 0. This file tracks the step breakdown a
 6. [x] Coverage wired (low initial thresholds; ratchet per plan §6 Q11)
 7. [x] `.github/workflows/ci.yml` — typecheck → lint → test → coverage, blocking
 8. [x] Verify locally: `pnpm install && pnpm turbo run typecheck lint test` (13/13 tasks green incl. e2e + format:check)
-9. [x] Verify the gate gates locally: a deliberately failing test failed the run; a missing-types type error failed typecheck. Re-verify in CI once remote exists.
-10. [ ] PR, merge when green, tag `phase-0-complete` — blocked on remote/auth
+9. [x] Verify the gate gates **in CI**: a deliberately failing test failed the `checks` job (run 28825070825), and a type-breaking commit failed it too (run 28825133205); both reverted. Also verified locally beforehand.
+10. [x] PR #1, merge when green, tag `phase-0-complete`
 
 ## Decisions & surprises (append as they happen)
 
-- **Blocked on remote:** no git remote configured and `gh` keyring token is invalid at session start. Working on local branch `phase-0/scaffolding`; push/PR/CI-verification deferred until the developer re-auths (`gh auth refresh -h github.com`) and a repo exists.
+- **Remote was briefly blocked:** no git remote and an invalid `gh` keyring token at session start. Developer re-authed via device flow mid-session; `snkoski/Spicy-Dicey` already existed on GitHub (empty), so it became `origin` — no repo creation needed. Note: `gh` needs to run outside the command sandbox to reach the macOS keychain.
 - Playwright's trivial spec lives in `packages/client/e2e/` and runs as a separate turbo task (`e2e`), not inside `test` — keeps the required `typecheck lint test` pipeline browser-free and fast. CI runs `e2e` as its own job.
 - **Internal-packages pattern (no build step):** workspace packages export TS source directly (`exports: "./src/index.ts"`); Vite/Vitest/tsx compile just-in-time. Avoids `tsc` build orchestration in Phase 0; a `build` task can be added when the server needs a production bundle (Phase 6).
 - **Vitest 2 → 3:** vitest 2.x pins vite 5, which type-clashes with the client's vite 6 plugin array under `exactOptionalPropertyTypes`. Bumped vitest/@vitest/coverage-v8 to ^3 everywhere instead of downgrading vite.
