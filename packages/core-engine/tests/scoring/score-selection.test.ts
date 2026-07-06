@@ -50,7 +50,9 @@ describe('scoreSelection — three of a kind (A.1: face × 100, three 1s = 1000)
 describe('scoreSelection — 4/5/6 of a kind, flat scaling (A.1 default: 1000/2000/3000 regardless of face)', () => {
   it.each<[DieValue[], number]>([
     [[2, 2, 2, 2], 1000],
-    [[1, 1, 1, 1], 1000],
+    // Max interpretation: three 1s + a single 1 (1100) beats flat 4oak (1000).
+    // The same split never helps other faces (their leftovers don't score).
+    [[1, 1, 1, 1], 1100],
     [[6, 6, 6, 6], 1000],
     [[3, 3, 3, 3, 3], 2000],
     [[5, 5, 5, 5, 5], 2000],
@@ -64,7 +66,7 @@ describe('scoreSelection — 4/5/6 of a kind, flat scaling (A.1 default: 1000/20
     [[2, 2, 2, 2, 1], 1100],
     [[6, 6, 6, 6, 5, 5], 1100],
     [[3, 3, 3, 3, 3, 1], 2100],
-    [[1, 1, 1, 1, 5], 1050],
+    [[1, 1, 1, 1, 5], 1150], // (three 1s + single 1) + single 5
   ])('n-of-a-kind plus singles %j scores %d', (dice, expected) => {
     expect(score(dice)).toBe(expected);
   });

@@ -48,30 +48,46 @@ function scoreWholeSet(counts: ReturnType<typeof toCounts>, ruleset: RulesetConf
 }
 
 /**
- * Face-by-face interpretation: each face's dice must score on their own —
- * singles for 1s/5s below three-of-a-kind, N-of-a-kind at three or more.
- * Any face with a non-scoring residue makes the whole interpretation illegal.
+ * Face-by-face interpretation: each face's dice must fully partition into
+ * combos of that face (singles for 1s/5s, N-of-a-kind at three or more),
+ * maximized per face — e.g. four 1s reads as three-1s + a single 1 (1100)
+ * when that beats the four-of-a-kind value. Any face with a non-scoring
+ * residue makes the whole interpretation illegal.
  */
 function scoreFaceWise(counts: ReturnType<typeof toCounts>, ruleset: RulesetConfig): number | null {
   let total = 0;
   for (let face = 1; face <= 6; face += 1) {
     const n = counts[face] ?? 0;
-    if (n === 0) {
-      continue;
+    const best = bestFaceScore(face, n, ruleset);
+    if (best === null) {
+      return null;
     }
-    if (n >= 3) {
-      total += nOfAKindValue(face, n, ruleset);
-      continue;
-    }
-    if (face === 1) {
-      total += n * ruleset.singleOneValue;
-    } else if (face === 5) {
-      total += n * ruleset.singleFiveValue;
-    } else {
-      return null; // 1-2 of a non-single face never scores
-    }
+    total += best;
   }
   return total;
+}
+
+/** Best full partition of `n` dice of one face into combos, or null if impossible. */
+function bestFaceScore(face: number, n: number, ruleset: RulesetConfig): number | null {
+  if (n === 0) {
+    return 0;
+  }
+  let best: number | null = null;
+  const singleValue =
+    face === 1 ? ruleset.singleOneValue : face === 5 ? ruleset.singleFiveValue : null;
+  if (singleValue !== null) {
+    const rest = bestFaceScore(face, n - 1, ruleset);
+    if (rest !== null) {
+      best = Math.max(best ?? -Infinity, singleValue + rest);
+    }
+  }
+  for (let m = 3; m <= n; m += 1) {
+    const rest = bestFaceScore(face, n - m, ruleset);
+    if (rest !== null) {
+      best = Math.max(best ?? -Infinity, nOfAKindValue(face, m, ruleset) + rest);
+    }
+  }
+  return best;
 }
 
 function nOfAKindValue(face: number, n: number, ruleset: RulesetConfig): number {
