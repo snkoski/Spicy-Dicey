@@ -37,7 +37,14 @@ export { BUILTIN_STRATEGIES, getBuiltinStrategy } from './strategy/builtins.js';
 export type { GameConfig, GamePlayerConfig, GameLogEvent, GameResult } from './game/types.js';
 export type { MatchConfig, MatchPlayer, MatchState } from './match/types.js';
 export type { MatchTransition } from './match/match.js';
-export { startMatch, matchRoll, matchSelect, matchDecide, matchCanBank } from './match/match.js';
+export {
+  startMatch,
+  matchRoll,
+  matchSelect,
+  matchDecide,
+  matchCanBank,
+  matchForfeit,
+} from './match/match.js';
 export { runGame } from './game/run-game.js';
 export { applyFarkleToBank } from './game/farkle-penalty.js';
 export type { FarkleBankState, FarkleBankResult } from './game/farkle-penalty.js';

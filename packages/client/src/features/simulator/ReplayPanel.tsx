@@ -85,6 +85,8 @@ function describeEvent(event: GameLogEvent): string {
       return `${event.playerId} rolls again with ${event.diceToRoll} dice`;
     case 'farkled':
       return `${event.playerId} farkles, losing ${event.pointsLost}${event.penaltyApplied ? ` (and a ${event.penaltyApplied} penalty)` : ''}`;
+    case 'turn-forfeited':
+      return `${event.playerId} runs out of time, losing ${event.pointsLost}`;
     case 'banked':
       return `${event.playerId} banks ${event.pointsAdded} → ${event.newTotal}`;
     case 'final-round-triggered':

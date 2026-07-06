@@ -32,6 +32,7 @@ export type GameLogEvent =
     }
   | { type: 'decision'; playerId: string; decision: 'bank' | 'roll'; diceToRoll: number }
   | { type: 'farkled'; playerId: string; pointsLost: number; penaltyApplied: number }
+  | { type: 'turn-forfeited'; playerId: string; pointsLost: number }
   | { type: 'banked'; playerId: string; pointsAdded: number; newTotal: number; onTheBoard: boolean }
   | { type: 'final-round-triggered'; playerId: string }
   | {

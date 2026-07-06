@@ -144,6 +144,19 @@ export function matchDecide(state: MatchState, decision: 'bank' | 'roll'): Match
   return endTurnAndAdvance(next, events);
 }
 
+/**
+ * Auto-pass (turn timeout or absent player): the turn ends with no points,
+ * the farkle counter is untouched, and play advances — from any live phase.
+ */
+export function matchForfeit(state: MatchState): MatchTransition {
+  assertActive(state);
+  const player = currentPlayer(state);
+  const events: GameLogEvent[] = [
+    { type: 'turn-forfeited', playerId: player.id, pointsLost: state.turn.turnScore },
+  ];
+  return endTurnAndAdvance(state, events);
+}
+
 /** Whether the current player may bank right now (on-the-board gating). */
 export function matchCanBank(state: MatchState): boolean {
   return (
