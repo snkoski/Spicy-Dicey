@@ -73,6 +73,11 @@ export class Room {
     this.now = deps.now ?? Date.now;
   }
 
+  /** Current turn phase, for thin handlers routing roll vs roll-again. */
+  currentPhase(): string | null {
+    return this.match?.turn.phase ?? null;
+  }
+
   get status(): 'lobby' | 'active' | 'ended' {
     if (this.match === null) {
       return 'lobby';
@@ -266,9 +271,7 @@ export class Room {
         status: this.match.status,
         winnerId: this.match.winnerId,
         currentPlayerId:
-          this.match.status === 'active'
-            ? this.match.players[this.match.currentSeat]!.id
-            : null,
+          this.match.status === 'active' ? this.match.players[this.match.currentSeat]!.id : null,
         players: this.match.players.map((p) => ({
           id: p.id,
           total: p.total,
