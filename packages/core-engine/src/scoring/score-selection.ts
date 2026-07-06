@@ -34,14 +34,9 @@ function scoreFaceWise(counts: ReturnType<typeof toCounts>, ruleset: RulesetConf
     if (n === 0) {
       continue;
     }
-    if (n === 3) {
-      total +=
-        face === 1 ? ruleset.threeOnesValue : face * ruleset.threeOfAKindFaceMultiplier;
+    if (n >= 3) {
+      total += nOfAKindValue(face, n, ruleset);
       continue;
-    }
-    if (n > 3) {
-      // 4/5/6-of-a-kind: next cycle.
-      return null;
     }
     if (face === 1) {
       total += n * ruleset.singleOneValue;
@@ -52,4 +47,19 @@ function scoreFaceWise(counts: ReturnType<typeof toCounts>, ruleset: RulesetConf
     }
   }
   return total;
+}
+
+function nOfAKindValue(face: number, n: number, ruleset: RulesetConfig): number {
+  const threeValue =
+    face === 1 ? ruleset.threeOnesValue : face * ruleset.threeOfAKindFaceMultiplier;
+  if (n === 3) {
+    return threeValue;
+  }
+  if (n === 4) {
+    return ruleset.fourOfAKindFlatValue;
+  }
+  if (n === 5) {
+    return ruleset.fiveOfAKindFlatValue;
+  }
+  return ruleset.sixOfAKindFlatValue;
 }

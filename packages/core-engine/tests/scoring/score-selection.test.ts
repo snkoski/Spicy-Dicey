@@ -47,6 +47,34 @@ describe('scoreSelection — three of a kind (A.1: face × 100, three 1s = 1000)
   });
 });
 
+describe('scoreSelection — 4/5/6 of a kind, flat scaling (A.1 default: 1000/2000/3000 regardless of face)', () => {
+  it.each<[DieValue[], number]>([
+    [[2, 2, 2, 2], 1000],
+    [[1, 1, 1, 1], 1000],
+    [[6, 6, 6, 6], 1000],
+    [[3, 3, 3, 3, 3], 2000],
+    [[5, 5, 5, 5, 5], 2000],
+    [[4, 4, 4, 4, 4, 4], 3000],
+    [[1, 1, 1, 1, 1, 1], 3000],
+  ])('%j scores %d', (dice, expected) => {
+    expect(score(dice)).toBe(expected);
+  });
+
+  it.each<[DieValue[], number]>([
+    [[2, 2, 2, 2, 1], 1100],
+    [[6, 6, 6, 6, 5, 5], 1100],
+    [[3, 3, 3, 3, 3, 1], 2100],
+    [[1, 1, 1, 1, 5], 1050],
+  ])('n-of-a-kind plus singles %j scores %d', (dice, expected) => {
+    expect(score(dice)).toBe(expected);
+  });
+
+  it('an n-of-a-kind plus a non-scoring die is illegal', () => {
+    expect(score([2, 2, 2, 2, 3])).toBeNull();
+    expect(score([6, 6, 6, 6, 6, 2])).toBeNull();
+  });
+});
+
 describe('scoreSelection — illegal selections score null', () => {
   it.each<[DieValue[]]>([
     [[]], // must keep at least one scoring die
