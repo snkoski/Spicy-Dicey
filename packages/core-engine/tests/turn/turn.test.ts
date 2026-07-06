@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_RULESET } from '../../src/ruleset/defaults.js';
-import { applyRoll, applySelection, bank, canBank, chooseRoll, startTurn } from '../../src/turn/turn.js';
+import {
+  applyRoll,
+  applySelection,
+  bank,
+  canBank,
+  chooseRoll,
+  startTurn,
+} from '../../src/turn/turn.js';
 
 describe('startTurn', () => {
   it('begins awaiting a roll of all six dice with a clean score', () => {
