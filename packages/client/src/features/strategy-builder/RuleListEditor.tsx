@@ -187,9 +187,7 @@ function SortableRuleRow<Action extends string>({
                 aria-label="subject"
                 className="w-auto"
                 value={comparison.subject}
-                onChange={(e) =>
-                  setComparison(i, { subject: e.target.value as ConditionSubject })
-                }
+                onChange={(e) => setComparison(i, { subject: e.target.value as ConditionSubject })}
               >
                 {subjects.map((s) => (
                   <option key={s} value={s}>
@@ -254,7 +252,9 @@ function SortableRuleRow<Action extends string>({
               aria-label="action"
               className="w-auto"
               value={rule.action}
-              onChange={(e) => onUpdate(identified.key, { ...rule, action: e.target.value as Action })}
+              onChange={(e) =>
+                onUpdate(identified.key, { ...rule, action: e.target.value as Action })
+              }
             >
               {actions.map((a) => (
                 <option key={a} value={a}>

@@ -4,9 +4,6 @@ import type { ComponentProps } from 'react';
 
 export function Label({ className, ...props }: ComponentProps<typeof LabelPrimitive.Root>) {
   return (
-    <LabelPrimitive.Root
-      className={cn('text-sm font-medium leading-none', className)}
-      {...props}
-    />
+    <LabelPrimitive.Root className={cn('text-sm font-medium leading-none', className)} {...props} />
   );
 }

@@ -16,10 +16,7 @@ export function TabsList({ className, ...props }: ComponentProps<typeof TabsPrim
   );
 }
 
-export function TabsTrigger({
-  className,
-  ...props
-}: ComponentProps<typeof TabsPrimitive.Trigger>) {
+export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       className={cn(
@@ -31,9 +28,14 @@ export function TabsTrigger({
   );
 }
 
-export function TabsContent({
-  className,
-  ...props
-}: ComponentProps<typeof TabsPrimitive.Content>) {
-  return <TabsPrimitive.Content className={cn('mt-4', className)} {...props} />;
+export function TabsContent({ className, ...props }: ComponentProps<typeof TabsPrimitive.Content>) {
+  // forceMount keeps panel state alive across tab switches — a simulation
+  // running in the simulator tab must survive a peek at the builder.
+  return (
+    <TabsPrimitive.Content
+      forceMount
+      className={cn('mt-4 data-[state=inactive]:hidden', className)}
+      {...props}
+    />
+  );
 }

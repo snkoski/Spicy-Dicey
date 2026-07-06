@@ -69,11 +69,13 @@ export function buildStrategyDefinition(
     schemaVersion: 1,
     id: `custom-${slug}`,
     name,
-    keepPolicy: keepRules.map(
-      (r): KeepRule => ({ condition: conditionFromEditor(r), action: r.action }),
-    ),
-    bankPolicy: bankRules.map(
-      (r): BankRule => ({ condition: conditionFromEditor(r), action: r.action }),
-    ),
+    keepPolicy: keepRules.map((r): KeepRule => ({
+      condition: conditionFromEditor(r),
+      action: r.action,
+    })),
+    bankPolicy: bankRules.map((r): BankRule => ({
+      condition: conditionFromEditor(r),
+      action: r.action,
+    })),
   };
 }
