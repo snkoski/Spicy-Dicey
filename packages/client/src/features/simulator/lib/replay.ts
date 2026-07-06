@@ -40,6 +40,10 @@ export function buildReplayFrames(log: GameLogEvent[]): ReplayFrame[] {
         tableDice = null;
         turnScore = 0;
         break;
+      case 'turn-forfeited':
+        tableDice = null;
+        turnScore = 0;
+        break;
       case 'banked':
         totals[event.playerId] = event.newTotal;
         tableDice = null;
