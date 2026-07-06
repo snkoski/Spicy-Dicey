@@ -139,9 +139,9 @@ describe('scoreSelection — three pairs (A.1: 1500; exactly three distinct face
   });
 
   it('reads the configured three-pairs value', () => {
-    expect(
-      scoreSelection([2, 2, 3, 3, 4, 4], { ...DEFAULT_RULESET, threePairsValue: 600 }),
-    ).toBe(600);
+    expect(scoreSelection([2, 2, 3, 3, 4, 4], { ...DEFAULT_RULESET, threePairsValue: 600 })).toBe(
+      600,
+    );
   });
 });
 

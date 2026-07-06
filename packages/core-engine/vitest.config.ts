@@ -5,7 +5,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**'],
-      thresholds: { lines: 50, functions: 50, branches: 50, statements: 50 },
+      // Barrel re-exports and type-only files have no executable statements.
+      exclude: ['src/index.ts', 'src/rng/types.ts', 'src/ruleset/types.ts'],
+      // Ratcheted per plan §6 Q11 — core-engine targets ~100% on scoring/strategy.
+      thresholds: { lines: 98, functions: 100, branches: 90, statements: 98 },
     },
   },
 });

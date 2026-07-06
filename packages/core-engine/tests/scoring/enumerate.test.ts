@@ -23,20 +23,11 @@ describe('enumerateLegalSelections', () => {
   });
 
   it('a triple with a discretionary five offers declining the five', () => {
-    expect(diceOf([2, 2, 2, 5])).toEqual([
-      [5],
-      [2, 2, 2],
-      [2, 2, 2, 5],
-    ]);
+    expect(diceOf([2, 2, 2, 5])).toEqual([[5], [2, 2, 2], [2, 2, 2, 5]]);
   });
 
   it('includes whole-set combos alongside their scoring singles', () => {
-    expect(diceOf([1, 2, 3, 4, 5, 6])).toEqual([
-      [1],
-      [5],
-      [1, 5],
-      [1, 2, 3, 4, 5, 6],
-    ]);
+    expect(diceOf([1, 2, 3, 4, 5, 6])).toEqual([[1], [5], [1, 5], [1, 2, 3, 4, 5, 6]]);
   });
 
   it('three pairs with scoring pairs: every singles subset plus the full set', () => {

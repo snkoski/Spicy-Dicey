@@ -1,0 +1,23 @@
+name: Nightly full property run
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  full-properties:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Plan §5 property-test budget: the >=100k-run invariants execute here
+      # at full strength; PR CI runs the same tests at a reduced numRuns.
+      - run: pnpm turbo run test --filter @spicy-dicey/core-engine
+        env:
+          FC_NUM_RUNS: '100000'

@@ -12,6 +12,7 @@
     "lint": {},
     "test": {
       "dependsOn": ["^build"],
+      "env": ["FC_NUM_RUNS"],
       "outputs": ["coverage/**"]
     },
     "e2e": {
