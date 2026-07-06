@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createMulberry32, DEFAULT_RULESET, getBuiltinStrategy, runGame } from '@spicy-dicey/core-engine';
+import {
+  createMulberry32,
+  DEFAULT_RULESET,
+  getBuiltinStrategy,
+  runGame,
+} from '@spicy-dicey/core-engine';
 import { buildReplayFrames } from '../../src/features/simulator/lib/replay';
 
 const game = runGame(

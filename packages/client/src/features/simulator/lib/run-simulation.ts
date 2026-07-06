@@ -123,12 +123,7 @@ function runRoundRobin(
   pairs.forEach(([i, j], pairIndex) => {
     for (let g = 0; g < config.numGames; g += 1) {
       const seed = config.seed + pairIndex * config.numGames + g;
-      const result = playGame(
-        [participants[i]!, participants[j]!],
-        config.ruleset,
-        seed,
-        g,
-      );
+      const result = playGame([participants[i]!, participants[j]!], config.ruleset, seed, g);
       gamesByParticipant.get(participants[i]!.id)!.push(result);
       gamesByParticipant.get(participants[j]!.id)!.push(result);
       if (result.winnerId === participants[i]!.id) {

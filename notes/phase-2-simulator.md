@@ -11,5 +11,5 @@ Deliverables/acceptance: plan §1 Phase 2. Strategy catalog: Appendix B.
 
 ## Decisions & surprises (append as they happen)
 
-- **Analytics live in the client, not core-engine** — win rates and distributions are simulator domain, not dice rules; the core invariant (no rules outside the engine) stays intact because analytics only *aggregate* `GameResult`s.
+- **Analytics live in the client, not core-engine** — win rates and distributions are simulator domain, not dice rules; the core invariant (no rules outside the engine) stays intact because analytics only _aggregate_ `GameResult`s.
 - **Client test/UI stack:** Tailwind v4 + shadcn/ui, Zustand for sim state, dnd-kit for the draggable rule lists, Recharts for charts. Worker logic is a pure function (`runSimulation`) wrapped by a ~10-line worker shell so determinism and analytics are unit-testable without a Worker runtime.
