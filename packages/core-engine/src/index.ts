@@ -1,3 +1,5 @@
-// Phase 0 placeholder — the real public API (rng, dice, scoring, ruleset,
-// turn, strategy, game) lands in Phase 1, test-first.
-export const ENGINE_NAME = '@spicy-dicey/core-engine';
+export type { RandomSource } from './rng/types.js';
+export { createMulberry32 } from './rng/mulberry32.js';
+export type { DieValue } from './dice/types.js';
+export { DIE_FACES } from './dice/types.js';
+export { rollDice } from './dice/roll.js';
