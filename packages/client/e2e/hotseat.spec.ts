@@ -84,3 +84,30 @@ test('instant-win variant also completes', async ({ page }) => {
   await playFullGame(page, 'instant');
   await expect(page.getByText(/game over — \w+ wins/i)).toBeVisible();
 });
+
+test('3D dice render alongside the accessible dice and values always match the engine', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const panel = page.getByRole('tabpanel', { name: 'Play' });
+  await panel.getByLabel(/player 1/i).fill('Ann');
+  await panel.getByLabel(/player 2/i).fill('Ben');
+  await panel.getByRole('button', { name: /start game/i }).click();
+  await panel.getByRole('button', { name: /^roll$/i }).click();
+
+  // 3D on (default without reduced motion) -> canvas is present
+  await expect(panel.getByTestId('dice-3d-canvas')).toBeVisible();
+  // the interaction surface stays the accessible dice buttons
+  await expect(panel.getByRole('button', { name: /die showing/i })).toHaveCount(6);
+
+  // toggling mid-turn keeps the same dice values on the table
+  const before = await panel
+    .getByRole('button', { name: /die showing/i })
+    .evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')));
+  await panel.getByRole('checkbox', { name: /3d dice/i }).uncheck();
+  await expect(panel.getByTestId('dice-3d-canvas')).toHaveCount(0);
+  const after = await panel
+    .getByRole('button', { name: /die showing/i })
+    .evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')));
+  expect(after).toEqual(before);
+});

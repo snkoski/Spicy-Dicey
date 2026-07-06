@@ -7,7 +7,7 @@ import { PIP_LAYOUTS } from './faces';
  * logic is testable without a real canvas.
  */
 export interface FacePainterContext {
-  fillStyle: string;
+  fillStyle: string | CanvasGradient | CanvasPattern;
   fillRect(x: number, y: number, w: number, h: number): void;
   beginPath(): void;
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number): void;
