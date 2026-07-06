@@ -48,17 +48,23 @@ describe('strategyDefinitionSchema', () => {
 
   it.each([
     ['wrong schemaVersion', { schemaVersion: 2 }],
-    ['unknown subject', {
-      bankPolicy: [
-        {
-          condition: { type: 'comparison', subject: 'lastRoll', cmp: 'eq', value: 1 },
-          action: 'bank',
-        },
-      ],
-    }],
-    ['unknown action', {
-      bankPolicy: [{ condition: { type: 'always' }, action: 'explode' }],
-    }],
+    [
+      'unknown subject',
+      {
+        bankPolicy: [
+          {
+            condition: { type: 'comparison', subject: 'lastRoll', cmp: 'eq', value: 1 },
+            action: 'bank',
+          },
+        ],
+      },
+    ],
+    [
+      'unknown action',
+      {
+        bankPolicy: [{ condition: { type: 'always' }, action: 'explode' }],
+      },
+    ],
     ['missing name', { name: undefined }],
   ])('rejects %s', (_label, overrides) => {
     const base = {
