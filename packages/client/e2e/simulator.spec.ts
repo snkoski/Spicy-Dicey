@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 test('app boots with simulator and builder tabs', async ({ page }) => {
   await page.goto('/');
@@ -6,7 +6,7 @@ test('app boots with simulator and builder tabs', async ({ page }) => {
   await expect(page.getByRole('tab', { name: 'Strategy builder' })).toBeVisible();
 });
 
-async function openSimulator(page: import('@playwright/test').Page) {
+async function openSimulator(page: Page) {
   await page.goto('/');
   await page.getByRole('tab', { name: 'Simulator' }).click();
   return page.getByRole('tabpanel', { name: 'Simulator' });
