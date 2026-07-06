@@ -57,14 +57,17 @@ function rotateVector(
   rz: number,
 ): [number, number, number] {
   // rotate around X
-  let [px, py, pz] = [x, y * Math.cos(rx) - z * Math.sin(rx), y * Math.sin(rx) + z * Math.cos(rx)];
+  const [ax, ay, az] = [
+    x,
+    y * Math.cos(rx) - z * Math.sin(rx),
+    y * Math.sin(rx) + z * Math.cos(rx),
+  ];
   // rotate around Y
-  [px, py, pz] = [
-    px * Math.cos(ry) + pz * Math.sin(ry),
-    py,
-    -px * Math.sin(ry) + pz * Math.cos(ry),
+  const [bx, by, bz] = [
+    ax * Math.cos(ry) + az * Math.sin(ry),
+    ay,
+    -ax * Math.sin(ry) + az * Math.cos(ry),
   ];
   // rotate around Z
-  [px, py, pz] = [px * Math.cos(rz) - py * Math.sin(rz), px * Math.sin(rz) + py * Math.cos(rz), pz];
-  return [px, py, pz];
+  return [bx * Math.cos(rz) - by * Math.sin(rz), bx * Math.sin(rz) + by * Math.cos(rz), bz];
 }
