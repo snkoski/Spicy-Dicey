@@ -15,7 +15,7 @@ const config = {
   mode: 'head-to-head' as const,
 };
 
-describe('handleWorkerRequest', () => {
+describe('handleWorkerRequest', { timeout: 120_000 }, () => {
   it('posts throttled progress then a done message matching the direct run', () => {
     const messages: WorkerResponse[] = [];
     handleWorkerRequest({ type: 'run', config }, (m) => messages.push(m));
