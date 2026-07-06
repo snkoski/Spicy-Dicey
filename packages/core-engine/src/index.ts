@@ -13,3 +13,6 @@ export { DEFAULT_RULESET } from './ruleset/defaults.js';
 export { scoreSelection } from './scoring/score-selection.js';
 export { enumerateLegalSelections, isFarkle } from './scoring/enumerate.js';
 export type { ScoredSelection } from './scoring/enumerate.js';
+export type { TurnPhase, TurnState } from './turn/types.js';
+export type { TurnContext } from './turn/turn.js';
+export { startTurn, applyRoll, applySelection, chooseRoll, canBank, bank } from './turn/turn.js';
