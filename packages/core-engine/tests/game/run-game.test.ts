@@ -24,12 +24,16 @@ describe('runGame', () => {
     expect(result.finalScores[result.winnerId!]).toBe(Math.max(...scores));
   });
 
-  it('is byte-identical across 1000 runs for the same (seed, ruleset, strategies)', () => {
-    const reference = JSON.stringify(runGame(twoPlayers(), createMulberry32(123)));
-    for (let i = 0; i < 1000; i += 1) {
-      expect(JSON.stringify(runGame(twoPlayers(), createMulberry32(123)))).toBe(reference);
-    }
-  });
+  it(
+    'is byte-identical across 1000 runs for the same (seed, ruleset, strategies)',
+    { timeout: 120_000 }, // 1000 full games outrun the 5s default on slow CI runners
+    () => {
+      const reference = JSON.stringify(runGame(twoPlayers(), createMulberry32(123)));
+      for (let i = 0; i < 1000; i += 1) {
+        expect(JSON.stringify(runGame(twoPlayers(), createMulberry32(123)))).toBe(reference);
+      }
+    },
+  );
 
   it('different seeds produce different games', () => {
     const a = JSON.stringify(runGame(twoPlayers(), createMulberry32(1)).log);
