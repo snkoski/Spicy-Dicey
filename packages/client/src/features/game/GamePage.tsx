@@ -49,9 +49,7 @@ function SetupForm() {
                 <Input
                   id={`player-${i}`}
                   value={name}
-                  onChange={(e) =>
-                    setNames(names.map((n, j) => (j === i ? e.target.value : n)))
-                  }
+                  onChange={(e) => setNames(names.map((n, j) => (j === i ? e.target.value : n)))}
                 />
               </div>
               {names.length > 2 && (
@@ -68,7 +66,12 @@ function SetupForm() {
             </div>
           ))}
           {names.length < 8 && (
-            <Button type="button" variant="outline" size="sm" onClick={() => setNames([...names, ''])}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setNames([...names, ''])}
+            >
               Add player
             </Button>
           )}
@@ -157,9 +160,7 @@ function GameBoard() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>
-              {ended ? 'Game over' : `${currentPlayerName}'s turn`}
-            </CardTitle>
+            <CardTitle>{ended ? 'Game over' : `${currentPlayerName}'s turn`}</CardTitle>
             <label className="flex items-center gap-2 text-sm text-slate-500">
               <input
                 type="checkbox"
@@ -210,12 +211,7 @@ function GameBoard() {
                   <Button type="button" onClick={rollAgain}>
                     Roll again
                   </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={!canBankNow()}
-                    onClick={bank}
-                  >
+                  <Button type="button" variant="secondary" disabled={!canBankNow()} onClick={bank}>
                     Bank {match.turn.turnScore}
                   </Button>
                 </>
