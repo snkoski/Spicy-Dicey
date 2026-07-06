@@ -34,8 +34,13 @@ function scoreFaceWise(counts: ReturnType<typeof toCounts>, ruleset: RulesetConf
     if (n === 0) {
       continue;
     }
-    if (n >= 3) {
-      // N-of-a-kind: next cycle.
+    if (n === 3) {
+      total +=
+        face === 1 ? ruleset.threeOnesValue : face * ruleset.threeOfAKindFaceMultiplier;
+      continue;
+    }
+    if (n > 3) {
+      // 4/5/6-of-a-kind: next cycle.
       return null;
     }
     if (face === 1) {
