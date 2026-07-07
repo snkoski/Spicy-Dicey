@@ -119,3 +119,17 @@ export const simulationResults = sqliteTable('simulation_results', {
   avgFarkles: integer('avg_farkles_milli').notNull(),
   scoreDistribution: text('score_distribution').notNull(), // JSON
 });
+
+export const emailTokens = sqliteTable(
+  'email_tokens',
+  {
+    id: text('id').primaryKey(),
+    token: text('token').notNull(),
+    userId: text('user_id').notNull(),
+    kind: text('kind').notNull(), // verify|reset
+    createdAt: integer('created_at').notNull(),
+    expiresAt: integer('expires_at').notNull(),
+    usedAt: integer('used_at'),
+  },
+  (t) => [uniqueIndex('email_tokens_token_idx').on(t.token)],
+);

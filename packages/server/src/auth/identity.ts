@@ -13,6 +13,7 @@ export interface ResolvedIdentity {
   kind: 'user' | 'guest';
   userId: string | null;
   guestSessionId: string | null;
+  emailVerified: boolean;
 }
 
 export interface IdentityResolver {
@@ -33,6 +34,7 @@ export function createIdentityResolver(
           kind: 'user',
           userId: account.userId,
           guestSessionId: account.guestSessionId,
+          emailVerified: account.emailVerified,
         };
       }
       const guest = await guests.resolve(token);
@@ -43,6 +45,7 @@ export function createIdentityResolver(
           kind: 'guest',
           userId: null,
           guestSessionId: guest.guestSessionId,
+          emailVerified: false,
         };
       }
       return null;

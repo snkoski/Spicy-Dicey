@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
-import { and, desc, eq, gt, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, gt, isNotNull, isNull } from 'drizzle-orm';
+import type { Mailer } from '../email/mailer.js';
 import { schema, type AppDb } from '../db/client.js';
 
 const AUTH_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -15,6 +16,7 @@ export interface AccountUser {
 export interface AccountIdentity {
   userId: string;
   displayName: string;
+  emailVerified: boolean;
   /** The linked guest identity after an upgrade — keeps live room seats. */
   guestSessionId: string | null;
 }
@@ -29,11 +31,52 @@ export interface UserStats {
 interface AccountServiceOptions {
   bcryptRounds?: number;
   now?: () => number;
+  mailer?: Mailer;
 }
+
+const EMAIL_TOKEN_TTL_MS = 1000 * 60 * 60 * 24; // 24h
 
 export function createAccountService(db: AppDb, options: AccountServiceOptions = {}) {
   const rounds = options.bcryptRounds ?? 12;
   const now = options.now ?? Date.now;
+  const mailer = options.mailer;
+
+  async function issueEmailToken(userId: string, email: string, kind: 'verify' | 'reset') {
+    const token = randomBytes(24).toString('base64url');
+    await db.insert(schema.emailTokens).values({
+      id: randomUUID(),
+      token,
+      userId,
+      kind,
+      createdAt: now(),
+      expiresAt: now() + EMAIL_TOKEN_TTL_MS,
+      usedAt: null,
+    });
+    await mailer?.send({ to: email, kind, token });
+  }
+
+  async function consumeEmailToken(token: string, kind: 'verify' | 'reset') {
+    const [row] = await db
+      .select()
+      .from(schema.emailTokens)
+      .where(
+        and(
+          eq(schema.emailTokens.token, token),
+          eq(schema.emailTokens.kind, kind),
+          gt(schema.emailTokens.expiresAt, now()),
+          isNull(schema.emailTokens.usedAt),
+        ),
+      )
+      .limit(1);
+    if (!row) {
+      return null;
+    }
+    await db
+      .update(schema.emailTokens)
+      .set({ usedAt: now() })
+      .where(eq(schema.emailTokens.id, row.id));
+    return row;
+  }
 
   async function createAuthSession(userId: string): Promise<string> {
     const token = randomBytes(32).toString('base64url');
@@ -76,7 +119,46 @@ export function createAccountService(db: AppDb, options: AccountServiceOptions =
   return {
     async signup(email: string, password: string, displayName: string) {
       const user = await createUser(email, password, displayName);
+      await issueEmailToken(user.id, email, 'verify');
       return { user, token: await createAuthSession(user.id) };
+    },
+
+    async verifyEmail(token: string): Promise<boolean> {
+      const row = await consumeEmailToken(token, 'verify');
+      if (!row) {
+        return false;
+      }
+      await db
+        .update(schema.users)
+        .set({ emailVerified: true, updatedAt: now() })
+        .where(eq(schema.users.id, row.userId));
+      return true;
+    },
+
+    /** Same response whether or not the email exists (no account probing). */
+    async requestPasswordReset(email: string): Promise<void> {
+      const [user] = await db
+        .select({ id: schema.users.id, email: schema.users.email })
+        .from(schema.users)
+        .where(eq(schema.users.email, email))
+        .limit(1);
+      if (user) {
+        await issueEmailToken(user.id, user.email, 'reset');
+      }
+    },
+
+    async resetPassword(token: string, newPassword: string): Promise<boolean> {
+      const row = await consumeEmailToken(token, 'reset');
+      if (!row) {
+        return false;
+      }
+      await db
+        .update(schema.users)
+        .set({ passwordHash: await bcrypt.hash(newPassword, rounds), updatedAt: now() })
+        .where(eq(schema.users.id, row.userId));
+      // revoke existing sessions: a reset invalidates everything outstanding
+      await db.delete(schema.authSessions).where(eq(schema.authSessions.userId, row.userId));
+      return true;
     },
 
     async login(email: string, password: string) {
@@ -132,6 +214,7 @@ export function createAccountService(db: AppDb, options: AccountServiceOptions =
       return {
         userId: user.id,
         displayName: user.displayName,
+        emailVerified: user.emailVerified,
         guestSessionId: guest?.id ?? null,
       };
     },

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_RULESET, getBuiltinStrategy } from '@spicy-dicey/core-engine';
-import { runSimulation } from '../../src/features/simulator/lib/run-simulation';
-import type { SimulationConfig } from '../../src/features/simulator/lib/run-simulation';
+import { DEFAULT_RULESET } from '../../src/ruleset/defaults.js';
+import { getBuiltinStrategy } from '../../src/strategy/builtins.js';
+import { runSimulation } from '../../src/simulation/run-simulation.js';
+import type { SimulationConfig } from '../../src/simulation/run-simulation.js';
 
 const config = (overrides: Partial<SimulationConfig> = {}): SimulationConfig => ({
   strategies: [
