@@ -1,13 +1,22 @@
-import { describe, expect, it } from 'vitest';
-import { createSqliteDb, schema } from '../../src/db/client.js';
+import { afterAll, describe, expect, it } from 'vitest';
+import { schema } from '../../src/db/client.js';
 import {
   createDbSessionStore,
   GUEST_SESSION_TTL_MS,
   purgeExpiredGuestSessions,
 } from '../../src/db/session-store.js';
+import { createTestDb } from './test-db.js';
 
-const setup = (now = 1_000_000) => {
-  const db = createSqliteDb(':memory:');
+const closers: Array<() => Promise<void>> = [];
+afterAll(async () => {
+  for (const close of closers) {
+    await close();
+  }
+});
+
+const setup = async (now = 1_000_000) => {
+  const { db, close } = await createTestDb();
+  closers.push(close);
   let clock = now;
   const store = createDbSessionStore(db, () => clock);
   return { db, store, setClock: (t: number) => (clock = t) };
@@ -15,21 +24,21 @@ const setup = (now = 1_000_000) => {
 
 describe('DB-backed session store', () => {
   it('creates and resolves guest sessions', async () => {
-    const { store } = setup();
+    const { store } = await setup();
     const { token, identity } = await store.createGuest('Ann');
     expect(await store.resolve(token)).toEqual(identity);
     expect(await store.resolve('bogus')).toBeNull();
   });
 
   it('revokes sessions', async () => {
-    const { store } = setup();
+    const { store } = await setup();
     const { token } = await store.createGuest('Ann');
     await store.revoke(token);
     expect(await store.resolve(token)).toBeNull();
   });
 
   it('expired guest sessions do not resolve', async () => {
-    const { store, setClock } = setup(1_000_000);
+    const { store, setClock } = await setup(1_000_000);
     const { token } = await store.createGuest('Ann');
     setClock(1_000_000 + GUEST_SESSION_TTL_MS + 1);
     expect(await store.resolve(token)).toBeNull();
@@ -38,7 +47,7 @@ describe('DB-backed session store', () => {
 
 describe('purgeExpiredGuestSessions (decision 6 enforcement)', () => {
   it('removes expired non-upgraded sessions and their game_players rows', async () => {
-    const { db, store } = setup(1_000_000);
+    const { db, store } = await setup(1_000_000);
     const { identity } = await store.createGuest('Ann');
     await db.insert(schema.gamePlayers).values({
       id: 'gp1',
@@ -56,7 +65,7 @@ describe('purgeExpiredGuestSessions (decision 6 enforcement)', () => {
   });
 
   it('keeps live sessions and upgraded ones (their stats now belong to a user)', async () => {
-    const { db } = setup(1_000_000);
+    const { db } = await setup(1_000_000);
     await db.insert(schema.guestSessions).values([
       {
         id: 'guest-live',
