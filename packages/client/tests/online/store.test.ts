@@ -18,7 +18,7 @@ function fakeTransport() {
       }
       return Promise.resolve({ ok: true });
     },
-    on: (event, handler) => void listeners.set(event, handler),
+    on: (event, handler) => void listeners.set(event, handler as (payload: unknown) => void),
     disconnect: () => {},
   };
   const push = (event: string, payload: unknown) => listeners.get(event)?.(payload);
