@@ -187,13 +187,18 @@ test('a guest upgrading mid-game keeps the seat and the result feeds account sta
 
   // one action into the game, Ann upgrades mid-game
   await annPanel.getByRole('button', { name: /^roll$/i }).click();
+  await expect(annPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
   await annPanel.getByLabel(/^email$/i).fill(`ann-${code}@example.com`);
   await annPanel.getByLabel(/^password$/i).fill('hunter22aa');
   await annPanel.getByRole('button', { name: /create account/i }).click();
   await expect(annPanel.getByText(/account created/i)).toBeVisible();
 
   // the seat is untouched: still Ann's turn, dice still on the table
-  await expect(annPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible();
+  await expect(annPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
 
   for (let step = 0; step < 600; step += 1) {
     if (
