@@ -10,11 +10,11 @@ export function setupErrorTracking(
   app: FastifyInstance,
   capture: (error: Error) => void = defaultCapture(),
 ): void {
-  app.setErrorHandler((error, request, reply) => {
-    if ((error.statusCode ?? 500) >= 500) {
+  app.setErrorHandler((error: Error & { statusCode?: number }, _request, reply) => {
+    const status = error.statusCode ?? 500;
+    if (status >= 500) {
       capture(error);
     }
-    const status = error.statusCode ?? 500;
     void reply.status(status).send({
       error: status >= 500 ? 'internal server error' : error.message,
     });
