@@ -167,3 +167,59 @@ test('a spectator sees live state but has no controls; rejoining resumes a held 
     .evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')));
   expect(diceAfter).toEqual(diceBefore);
 });
+
+test('a guest upgrading mid-game keeps the seat and the result feeds account stats', async ({
+  browser,
+}) => {
+  test.setTimeout(180_000);
+  const ann = await openOnline(browser, 'Ann');
+  const annPanel = onlinePanel(ann);
+  await annPanel.getByLabel(/target score/i).fill('500');
+  await annPanel.getByLabel(/turn timer/i).selectOption('off');
+  await annPanel.getByRole('button', { name: /create room/i }).click();
+  const code = (await annPanel.locator('span.font-mono').first().textContent())!.trim();
+
+  const ben = await openOnline(browser, 'Ben');
+  const benPanel = onlinePanel(ben);
+  await benPanel.getByLabel(/room code/i).fill(code);
+  await benPanel.getByRole('button', { name: /join room/i }).click();
+  await annPanel.getByRole('button', { name: /start game/i }).click();
+
+  // one action into the game, Ann upgrades mid-game
+  await annPanel.getByRole('button', { name: /^roll$/i }).click();
+  await expect(annPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await annPanel.getByLabel(/^email$/i).fill(`ann-${code}@example.com`);
+  await annPanel.getByLabel(/^password$/i).fill('hunter22aa');
+  await annPanel.getByRole('button', { name: /create account/i }).click();
+  await expect(annPanel.getByText(/account created/i)).toBeVisible();
+
+  // the seat is untouched: still Ann's turn, dice still on the table
+  await expect(annPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+
+  for (let step = 0; step < 600; step += 1) {
+    if (
+      await annPanel
+        .getByText(/game over — .+ wins/i)
+        .first()
+        .isVisible()
+    ) {
+      break;
+    }
+    await takeTurnIfMine(ann);
+    await takeTurnIfMine(ben);
+  }
+  await expect(annPanel.getByText(/game over — .+ wins/i).first()).toBeVisible();
+
+  // the finished game shows up in Ann's account stats
+  await ann.getByRole('tab', { name: 'Account' }).click();
+  const accountPanel = ann.getByRole('tabpanel', { name: 'Account' });
+  await expect(accountPanel.getByText(/signed in as ann/i)).toBeVisible({ timeout: 15_000 });
+  await expect(accountPanel.getByText('Games played')).toBeVisible();
+  await expect(
+    accountPanel.locator('dd').first(), // games played value
+  ).toHaveText('1', { timeout: 15_000 });
+});
