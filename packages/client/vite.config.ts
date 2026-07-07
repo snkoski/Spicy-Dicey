@@ -7,6 +7,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/auth': 'http://localhost:3000',
+      '/users': 'http://localhost:3000',
+      '/strategies': 'http://localhost:3000',
+      '/simulations': 'http://localhost:3000',
       '/socket.io': { target: 'http://localhost:3000', ws: true },
     },
   },

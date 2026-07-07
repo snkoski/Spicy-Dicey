@@ -74,6 +74,38 @@ describe('finished-game persistence', () => {
     }
   });
 
+  it('a game finishing after an upgrade attributes to the new user (decision 6)', async () => {
+    const { db, close } = await createTestDb();
+    closers.push(close);
+    const accounts = createAccountService(db, { bcryptRounds: 4 });
+    // a real guest session that then upgrades
+    const { createDbSessionStore } = await import('../../src/db/session-store.js');
+    const guests = createDbSessionStore(db);
+    const guest = await guests.createGuest('Host');
+    const upgraded = await accounts.upgradeGuest(
+      guest.token,
+      'host@example.com',
+      'hunter22',
+      'Host',
+    );
+
+    let summary: FinishedGameSummary | null = null;
+    playToCompletion((s) => (summary = s));
+    const patched: FinishedGameSummary = {
+      ...summary!,
+      players: summary!.players.map((p) =>
+        p.identity === 'guest-host' ? { ...p, identity: guest.identity.guestSessionId } : p,
+      ),
+    };
+    await persistFinishedGame(db, patched);
+
+    const players = await db.select().from(schema.gamePlayers);
+    const hostRow = players.find((p) => p.userId === upgraded.user.id);
+    expect(hostRow).toBeDefined();
+    const stats = await accounts.statsFor(upgraded.user.id);
+    expect(stats.gamesPlayed).toBe(1);
+  });
+
   it('persistFinishedGame writes games + game_players and feeds user stats', async () => {
     const { db, close } = await createTestDb();
     closers.push(close);

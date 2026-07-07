@@ -5,6 +5,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RuleListEditor, type IdentifiedRule } from './RuleListEditor';
 import { buildStrategyDefinition } from './lib/rule-model';
+import { accountApi } from '../account/api';
 import { listCustomStrategies, saveCustomStrategy } from './lib/storage';
 
 const BANK_SUBJECTS = ['turnScore', 'diceRemaining', 'scoreDifferential', 'hotDiceStreak'] as const;
@@ -30,15 +31,30 @@ export function BuilderPage() {
       return;
     }
     try {
-      saveCustomStrategy(
-        buildStrategyDefinition(
-          name.trim(),
-          bankRules.map((r) => r.rule),
-          keepRules.map((r) => r.rule),
-        ),
+      const definition = buildStrategyDefinition(
+        name.trim(),
+        bankRules.map((r) => r.rule),
+        keepRules.map((r) => r.rule),
       );
+      saveCustomStrategy(definition);
       setError(null);
       setSavedCount(listCustomStrategies().length);
+      // Signed-in users also get the strategy saved to their account
+      // (plan §1 Phase 5); guests keep the localStorage copy only.
+      void accountApi
+        .me()
+        .then((me) => {
+          if (me?.kind === 'user') {
+            return fetch('/strategies', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ name: definition.name, rules: definition }),
+            });
+          }
+          return undefined;
+        })
+        .catch(() => undefined); // offline/anonymous: local copy is enough
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }

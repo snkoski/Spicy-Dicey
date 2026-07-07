@@ -1,6 +1,7 @@
 import type { UserStats } from './types';
 
-async function json<T>(res: Response): Promise<T> {
+async function json<T>(pending: Response | Promise<Response>): Promise<T> {
+  const res = await pending;
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(body.error ?? `request failed (${res.status})`);
@@ -37,8 +38,7 @@ export const accountApi = {
   logout: () => json<{ ok: boolean }>(post('/auth/logout', {})).then(() => undefined),
   upgrade: (email: string, password: string) =>
     json<{ user: unknown }>(post('/auth/upgrade', { email, password })).then(() => undefined),
-  stats: () =>
-    fetch('/users/me/stats', { credentials: 'include' }).then((r) => json<UserStats>(r)),
+  stats: () => fetch('/users/me/stats', { credentials: 'include' }).then((r) => json<UserStats>(r)),
   games: () =>
     fetch('/users/me/games', { credentials: 'include' }).then((r) =>
       json<{ games: Array<{ id: string; finalScore: number | null; placement: number | null }> }>(

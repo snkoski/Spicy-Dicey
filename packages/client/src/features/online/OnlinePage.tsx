@@ -8,6 +8,8 @@ import { Label } from '../../components/ui/label';
 import { Select } from '../../components/ui/select';
 import { cn } from '../../lib/utils';
 import { Die2D } from '../dice/Die2D';
+import { useQueryClient } from '@tanstack/react-query';
+import { accountApi } from '../account/api';
 import { connectAsGuest } from './transport';
 import { useOnlineStore, type OnlineTransport } from './store';
 
@@ -173,6 +175,7 @@ function RoomView() {
           {!room && <p className="text-sm text-slate-500">Waiting for the room state…</p>}
         </CardContent>
       </Card>
+      {selfId?.startsWith('guest-') && <UpgradeBox />}
       <ChatPanel />
     </div>
   );
@@ -293,6 +296,76 @@ function GamePanel({ room, selfId }: { room: RoomStateSnapshot; selfId: string |
         ))}
       </ul>
     </div>
+  );
+}
+
+function UpgradeBox() {
+  const queryClient = useQueryClient();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [state, setState] = useState<'idle' | 'done' | 'error'>('idle');
+  const [message, setMessage] = useState<string | null>(null);
+
+  if (state === 'done') {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-sm text-green-700">
+            Account created — this game and your session's finished games now count toward your
+            stats.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Save your progress</CardTitle>
+        <p className="text-sm text-slate-500">
+          Playing as a guest — create an account and this game carries over (decision 6).
+        </p>
+      </CardHeader>
+      <CardContent className="flex flex-wrap items-end gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="upgrade-email">Email</Label>
+          <Input
+            id="upgrade-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="upgrade-password">Password</Label>
+          <Input
+            id="upgrade-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <Button
+          type="button"
+          onClick={() => {
+            void accountApi
+              .upgrade(email, password)
+              .then(() => {
+                setState('done');
+                void queryClient.invalidateQueries();
+              })
+              .catch((e: unknown) => {
+                setState('error');
+                setMessage(e instanceof Error ? e.message : String(e));
+              });
+          }}
+        >
+          Create account
+        </Button>
+        {state === 'error' && message && <p className="text-sm text-red-600">{message}</p>}
+      </CardContent>
+    </Card>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -6,12 +6,23 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { accountApi } from './api';
 
-export function AccountPage() {
+export function AccountPage({ active = true }: { active?: boolean }) {
+  const queryClient = useQueryClient();
   const me = useQuery({ queryKey: ['me'], queryFn: accountApi.me });
+  // Tab panels stay mounted; refresh account data whenever the tab opens.
+  useEffect(() => {
+    if (active) {
+      void queryClient.invalidateQueries();
+    }
+  }, [active, queryClient]);
   if (me.isLoading) {
     return <p className="text-sm text-slate-500">Loading…</p>;
   }
-  return me.data?.kind === 'user' ? <ProfileView displayName={me.data.displayName} /> : <AuthForms />;
+  return me.data?.kind === 'user' ? (
+    <ProfileView displayName={me.data.displayName} />
+  ) : (
+    <AuthForms />
+  );
 }
 
 function AuthForms() {

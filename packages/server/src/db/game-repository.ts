@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { inArray } from 'drizzle-orm';
 import type { FinishedGameSummary } from '../game/room.js';
 import { schema, type AppDb } from './client.js';
 
@@ -13,11 +14,35 @@ export async function persistFinishedGame(
   summary: FinishedGameSummary,
 ): Promise<string> {
   const gameId = `game-${randomUUID()}`;
+  // A guest who upgraded mid-game gets the result attributed to the new
+  // account (decision 6): resolve upgradedUserId for guest identities.
+  const guestIds = summary.players
+    .map((p) => p.identity)
+    .filter((id) => !id.startsWith('user-'));
+  const upgradedBy = new Map(
+    guestIds.length === 0
+      ? []
+      : (
+          await db
+            .select({
+              id: schema.guestSessions.id,
+              upgradedUserId: schema.guestSessions.upgradedUserId,
+            })
+            .from(schema.guestSessions)
+            .where(inArray(schema.guestSessions.id, guestIds))
+        ).map((row) => [row.id, row.upgradedUserId]),
+  );
+  const attributedUserId = (identity: string): string | null => {
+    if (identity.startsWith('user-')) {
+      return identity;
+    }
+    return upgradedBy.get(identity) ?? null;
+  };
   const playerRows = summary.players.map((p) => ({
     id: `gp-${randomUUID()}`,
     gameId,
-    userId: p.identity.startsWith('user-') ? p.identity : null,
-    guestSessionId: p.identity.startsWith('user-') ? null : p.identity,
+    userId: attributedUserId(p.identity),
+    guestSessionId: attributedUserId(p.identity) ? null : p.identity,
     seatIndex: p.seatIndex,
     displayName: p.displayName,
     isSpectator: false,
