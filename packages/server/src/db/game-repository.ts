@@ -16,9 +16,7 @@ export async function persistFinishedGame(
   const gameId = `game-${randomUUID()}`;
   // A guest who upgraded mid-game gets the result attributed to the new
   // account (decision 6): resolve upgradedUserId for guest identities.
-  const guestIds = summary.players
-    .map((p) => p.identity)
-    .filter((id) => !id.startsWith('user-'));
+  const guestIds = summary.players.map((p) => p.identity).filter((id) => !id.startsWith('user-'));
   const upgradedBy = new Map(
     guestIds.length === 0
       ? []
