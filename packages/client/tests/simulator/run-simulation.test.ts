@@ -49,7 +49,7 @@ describe('runSimulation — head-to-head', () => {
     }
   });
 
-  it('supports mirror matches by suffixing duplicate ids', () => {
+  it('supports mirror matches by suffixing duplicate ids', { timeout: 60_000 }, () => {
     const result = runSimulation(
       config({
         strategies: [

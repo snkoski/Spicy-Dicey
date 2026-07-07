@@ -7,6 +7,8 @@ import {
   turnSelectSchema,
 } from '@spicy-dicey/contracts';
 import type { FastifyInstance } from 'fastify';
+import { createCryptoRandom } from '@spicy-dicey/core-engine';
+import { persistFinishedGame } from '../db/game-repository.js';
 import { RoomManager } from '../game/room-manager.js';
 import type { RoomOutbox } from '../game/room.js';
 import { SESSION_COOKIE } from '../routes/auth.js';
@@ -26,17 +28,23 @@ declare module 'socket.io' {
  * shared Zod schemas, authorize against the stable identity, delegate to
  * the Room — no rules logic here.
  */
-export function attachSockets(app: FastifyInstance, rooms = new RoomManager()): Server {
+export function attachSockets(
+  app: FastifyInstance,
+  rooms = new RoomManager(
+    createCryptoRandom,
+    (summary) => void persistFinishedGame(app.db, summary),
+  ),
+): Server {
   const io = new Server(app.server, { cors: { origin: true, credentials: true } });
 
   io.use((socket, next) => {
     const token = parseCookie(socket.handshake.headers.cookie)[SESSION_COOKIE];
-    void (token ? app.sessions.resolve(token) : Promise.resolve(null)).then((identity) => {
+    void (token ? app.identity.resolve(token) : Promise.resolve(null)).then((identity) => {
       if (!identity) {
         next(new Error('authentication required'));
         return;
       }
-      socket.data.identity = identity.guestSessionId;
+      socket.data.identity = identity.key;
       socket.data.displayName = identity.displayName;
       next();
     });
