@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run --coverage",
-    "dev": "tsx watch src/main.ts"
+    "dev": "tsx src/main.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

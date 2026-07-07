@@ -11,7 +11,7 @@ import type { GameLogEvent } from '@spicy-dicey/core-engine';
  * scripted fake in tests. */
 export interface OnlineTransport {
   emitWithAck(event: string, payload?: unknown): Promise<Record<string, unknown>>;
-  on(event: string, handler: (payload: never) => void): void;
+  on<T>(event: string, handler: (payload: T) => void): void;
   disconnect(): void;
 }
 
@@ -53,7 +53,9 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
       set((s) => ({ chat: [...s.chat, message] })),
     );
     transport.on('game:events', (events: GameLogEvent[]) => {
-      const banner = bannerFor(events);
+      const nameOf = (id: string) =>
+        get().room?.members.find((m) => m.playerId === id)?.displayName ?? id;
+      const banner = bannerFor(events, nameOf);
       if (banner) {
         set({ lastBanner: banner });
       }
@@ -115,22 +117,22 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
   },
 }));
 
-function bannerFor(events: GameLogEvent[]): string | null {
+function bannerFor(events: GameLogEvent[], nameOf: (id: string) => string): string | null {
   for (const event of [...events].reverse()) {
     switch (event.type) {
       case 'game-ended':
-        return `Game over — ${event.winnerId ?? 'nobody'} wins!`;
+        return `Game over — ${event.winnerId ? nameOf(event.winnerId) : 'nobody'} wins!`;
       case 'final-round-triggered':
-        return `${event.playerId} triggered the final round!`;
+        return `${nameOf(event.playerId)} triggered the final round!`;
       case 'farkled':
-        return `Farkle! ${event.playerId} loses ${event.pointsLost}.`;
+        return `Farkle! ${nameOf(event.playerId)} loses ${event.pointsLost}.`;
       case 'turn-forfeited':
-        return `${event.playerId} ran out of time.`;
+        return `${nameOf(event.playerId)} ran out of time.`;
       default:
         break;
     }
     if (event.type === 'selected' && event.hotDice) {
-      return `Hot dice! ${event.playerId} rolls all six again.`;
+      return `Hot dice! ${nameOf(event.playerId)} rolls all six again.`;
     }
   }
   return null;
