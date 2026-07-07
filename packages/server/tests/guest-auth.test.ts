@@ -35,11 +35,11 @@ describe('POST /auth/guest', () => {
       payload: { displayName: 'Ann' },
     });
     const token = res.cookies.find((c) => c.name === 'sd_session')!.value;
-    const identity = app.sessions.resolve(token);
+    const identity = await app.sessions.resolve(token);
     expect(identity).toMatchObject({
       guestSessionId: res.json().guestId,
       displayName: 'Ann',
     });
-    expect(app.sessions.resolve('bogus')).toBeNull();
+    expect(await app.sessions.resolve('bogus')).toBeNull();
   });
 });

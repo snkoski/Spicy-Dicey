@@ -7,13 +7,13 @@ export interface SessionIdentity {
 }
 
 /**
- * Stateful session store (decision 16). In-memory for Phase 4; Phase 5
- * swaps in the DB-backed implementation behind this same interface.
+ * Stateful session store (decision 16). Async because the production
+ * implementation is DB-backed; the in-memory variant remains for tests.
  */
 export interface SessionStore {
-  createGuest(displayName: string): { token: string; identity: SessionIdentity };
-  resolve(token: string): SessionIdentity | null;
-  revoke(token: string): void;
+  createGuest(displayName: string): Promise<{ token: string; identity: SessionIdentity }>;
+  resolve(token: string): Promise<SessionIdentity | null>;
+  revoke(token: string): Promise<void>;
 }
 
 export function createInMemorySessionStore(): SessionStore {
@@ -23,13 +23,14 @@ export function createInMemorySessionStore(): SessionStore {
       const identity: SessionIdentity = { guestSessionId: `guest-${randomUUID()}`, displayName };
       const token = randomBytes(32).toString('base64url');
       sessions.set(token, identity);
-      return { token, identity };
+      return Promise.resolve({ token, identity });
     },
     resolve(token) {
-      return sessions.get(token) ?? null;
+      return Promise.resolve(sessions.get(token) ?? null);
     },
     revoke(token) {
       sessions.delete(token);
+      return Promise.resolve();
     },
   };
 }

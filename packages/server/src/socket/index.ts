@@ -31,14 +31,15 @@ export function attachSockets(app: FastifyInstance, rooms = new RoomManager()): 
 
   io.use((socket, next) => {
     const token = parseCookie(socket.handshake.headers.cookie)[SESSION_COOKIE];
-    const identity = token ? app.sessions.resolve(token) : null;
-    if (!identity) {
-      next(new Error('authentication required'));
-      return;
-    }
-    socket.data.identity = identity.guestSessionId;
-    socket.data.displayName = identity.displayName;
-    next();
+    void (token ? app.sessions.resolve(token) : Promise.resolve(null)).then((identity) => {
+      if (!identity) {
+        next(new Error('authentication required'));
+        return;
+      }
+      socket.data.identity = identity.guestSessionId;
+      socket.data.displayName = identity.displayName;
+      next();
+    });
   });
 
   const outboxFor = (roomCode: string): RoomOutbox => ({
