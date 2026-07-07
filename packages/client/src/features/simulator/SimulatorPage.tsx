@@ -22,6 +22,8 @@ import { runSimulationInWorker } from '../../workers/run-in-worker';
 import { ResultsPanel } from './ResultsPanel';
 import { ReplayPanel } from './ReplayPanel';
 
+export const BACKEND_THRESHOLD = 5000; // decision 9
+
 export type SimRunner = (
   config: SimulationConfig,
   onProgress?: (completed: number, total: number) => void,
@@ -76,7 +78,12 @@ export function SimulatorPage({ runner = runSimulationInWorker }: { runner?: Sim
         seed,
         mode,
       };
-      setResult(await runner(config, (completed, total) => setProgress([completed, total])));
+      const onProgress = (completed: number, total: number) => setProgress([completed, total]);
+      // decision 9: big runs go to the backend job; anonymous users (or a
+      // missing backend) gracefully fall back to the in-browser worker.
+      const backendResult =
+        numGames > BACKEND_THRESHOLD ? await runOnBackend(config, onProgress) : null;
+      setResult(backendResult ?? (await runner(config, onProgress)));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -255,13 +262,89 @@ export function SimulatorPage({ runner = runSimulationInWorker }: { runner?: Sim
             >
               Export JSON
             </Button>
-            <Button type="button" variant="secondary" onClick={() => setShowReplay((v) => !v)}>
-              Replay sample game
-            </Button>
+            {result.sampleGameLog.length > 0 && (
+              <Button type="button" variant="secondary" onClick={() => setShowReplay((v) => !v)}>
+                Replay sample game
+              </Button>
+            )}
           </div>
           {showReplay && <ReplayPanel log={result.sampleGameLog} />}
         </>
       )}
     </div>
   );
+}
+
+/**
+ * Above the client threshold (decision 9), the run goes to the backend job
+ * endpoint (POST /simulations, poll — decision 7). Requires an account.
+ */
+async function runOnBackend(
+  config: SimulationConfig,
+  onProgress: (completed: number, total: number) => void,
+): Promise<SimulationResult | null> {
+  const created = await fetch('/simulations', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      strategyIds: config.strategies.map((s) => s.id),
+      rulesetConfig: config.ruleset,
+      numGames: config.numGames,
+      seed: config.seed,
+      mode: config.mode,
+    }),
+  }).catch(() => null);
+  if (created === null || !created.ok) {
+    return null; // anonymous / custom strategies / backend unavailable: the worker handles it
+  }
+  const { id } = (await created.json()) as { id: string };
+
+  for (;;) {
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    const res = await fetch(`/simulations/${id}`, { credentials: 'include' });
+    const body = (await res.json()) as { status: string };
+    onProgress(body.status === 'completed' ? 1 : 0.5, 1);
+    if (body.status === 'completed') {
+      break;
+    }
+    if (body.status === 'failed') {
+      throw new Error('the backend simulation failed');
+    }
+  }
+
+  const rows = (await fetch(`/simulations/${id}/results`, { credentials: 'include' }).then((r) =>
+    r.json(),
+  )) as Array<{
+    strategyId: string;
+    gamesPlayed: number;
+    gamesWon: number;
+    winRate: number;
+    avgFinalScore: number;
+    avgTurns: number;
+    avgFarkles: number;
+    scoreDistribution: SimulationResult['perStrategy'][string]['scoreDistribution'];
+  }>;
+  const perStrategy = Object.fromEntries(
+    rows.map((r) => [
+      r.strategyId,
+      {
+        gamesPlayed: r.gamesPlayed,
+        gamesWon: r.gamesWon,
+        winRate: r.winRate,
+        avgFinalScore: r.avgFinalScore,
+        avgTurns: r.avgTurns,
+        avgFarkles: r.avgFarkles,
+        scoreDistribution: r.scoreDistribution,
+      },
+    ]),
+  );
+  return {
+    perStrategy,
+    rankings: rows
+      .slice()
+      .sort((a, b) => b.winRate - a.winRate || b.avgFinalScore - a.avgFinalScore)
+      .map((r) => r.strategyId),
+    sampleGameLog: [], // backend jobs return aggregates only
+  };
 }

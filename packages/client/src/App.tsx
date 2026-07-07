@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { AccountPage } from './features/account/AccountPage';
+import { EmailTokenHandler } from './features/account/EmailTokenHandler';
+import { PrivacyPage, TermsPage } from './features/legal/LegalPages';
 import { GamePage } from './features/game/GamePage';
 import { OnlinePage } from './features/online/OnlinePage';
 import { SimulatorPage } from './features/simulator/SimulatorPage';
@@ -18,6 +20,7 @@ export function App() {
           <h1 className="text-2xl font-bold">Spicy Dicey</h1>
           <p className="text-sm text-slate-500">Farkle / Hot Dice — play it, then prove it</p>
         </header>
+        <EmailTokenHandler />
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="play">Play</TabsTrigger>
@@ -25,6 +28,8 @@ export function App() {
             <TabsTrigger value="simulator">Simulator</TabsTrigger>
             <TabsTrigger value="builder">Strategy builder</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="terms">Terms</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy</TabsTrigger>
           </TabsList>
           <TabsContent value="play">
             <GamePage />
@@ -40,6 +45,12 @@ export function App() {
           </TabsContent>
           <TabsContent value="account">
             <AccountPage active={tab === 'account'} />
+          </TabsContent>
+          <TabsContent value="terms">
+            <TermsPage />
+          </TabsContent>
+          <TabsContent value="privacy">
+            <PrivacyPage />
           </TabsContent>
         </Tabs>
       </main>

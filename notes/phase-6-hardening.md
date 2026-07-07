@@ -11,3 +11,7 @@ Deliverables/acceptance: plan §1 Phase 6; decisions 7 (in-process job), 9 (5k c
 ## Decisions & surprises (append as they happen)
 
 - **External services are env-gated behind interfaces** (mailer, CAPTCHA verifier, Sentry): CI and dev run fully offline with capture/mock implementations, so the acceptance flows (verification round-trip, reset round-trip, gated signup) are e2e-testable without provider accounts — pointing the env vars at real providers changes no code.
+- **Fastify plugin ordering:** routes must register inside `app.after()` so the rate-limit plugin's onRoute hook exists before /auth/* routes do — otherwise limits silently never attach (caught by the burst test failing first).
+- **Decision 9 refined:** >5000-game runs _attempt_ the backend job and gracefully fall back to the worker for anonymous users / custom strategies / unavailable backend — keeps the Phase-2 "10k in the worker" criterion true for guests while signed-in users offload.
+- **Sim runner moved into core-engine** (`src/simulation/`) so the backend job and the browser worker consume literally the same function; the client re-exports it. Tests moved with the code so coverage follows.
+- **Lesson re-learned:** python-heredoc string patches fail silently when prettier reformats between edits — the missing backend-fallback branch cost a debugging cycle. Edit tool with exact-match verification is safer for code paths.
