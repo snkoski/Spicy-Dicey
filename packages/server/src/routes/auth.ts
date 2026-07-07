@@ -11,6 +11,16 @@ export function registerAuthRoutes(app: FastifyInstance): void {
     if (!parsed.success) {
       return reply.status(400).send({ error: 'displayName is required' });
     }
+    // Re-presenting a valid session keeps the same identity — this is what
+    // lets a reloaded client reclaim its held seat (decision 16).
+    const existingToken = request.cookies[SESSION_COOKIE];
+    const existing = existingToken ? app.sessions.resolve(existingToken) : null;
+    if (existing) {
+      return reply.send({
+        guestId: existing.guestSessionId,
+        displayName: existing.displayName,
+      });
+    }
     const { token, identity } = app.sessions.createGuest(parsed.data.displayName);
     return reply
       .setCookie(SESSION_COOKIE, token, {

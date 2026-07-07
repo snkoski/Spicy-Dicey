@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { GamePage } from './features/game/GamePage';
+import { OnlinePage } from './features/online/OnlinePage';
 import { SimulatorPage } from './features/simulator/SimulatorPage';
 import { BuilderPage } from './features/strategy-builder/BuilderPage';
 
@@ -13,11 +14,15 @@ export function App() {
       <Tabs defaultValue="play">
         <TabsList>
           <TabsTrigger value="play">Play</TabsTrigger>
+          <TabsTrigger value="online">Online</TabsTrigger>
           <TabsTrigger value="simulator">Simulator</TabsTrigger>
           <TabsTrigger value="builder">Strategy builder</TabsTrigger>
         </TabsList>
         <TabsContent value="play">
           <GamePage />
+        </TabsContent>
+        <TabsContent value="online">
+          <OnlinePage />
         </TabsContent>
         <TabsContent value="simulator">
           <SimulatorPage />
