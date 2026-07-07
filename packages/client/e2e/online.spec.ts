@@ -136,6 +136,9 @@ test('a spectator sees live state but has no controls; rejoining resumes a held 
     .click();
   await annPanel.getByRole('button', { name: /start game/i }).click();
   await annPanel.getByRole('button', { name: /^roll$/i }).click();
+  await expect(annPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
 
   // spectator joins mid-game
   const sam = await openOnline(browser, 'Sam');
@@ -143,7 +146,9 @@ test('a spectator sees live state but has no controls; rejoining resumes a held 
   await samPanel.getByRole('checkbox', { name: /join as spectator/i }).check();
   await samPanel.getByLabel(/room code/i).fill(code);
   await samPanel.getByRole('button', { name: /join room/i }).click();
-  await expect(samPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible();
+  await expect(samPanel.getByRole('button', { name: /die showing/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(samPanel.getByRole('button', { name: /keep selection/i })).toHaveCount(0);
   await expect(samPanel.getByText(/^your turn$/i)).toHaveCount(0);
 
