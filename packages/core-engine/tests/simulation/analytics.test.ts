@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { GameResult } from '@spicy-dicey/core-engine';
-import { aggregateStrategyStats } from '../../src/features/simulator/lib/analytics';
+import type { GameResult } from '../../src/game/types.js';
+import { aggregateStrategyStats } from '../../src/simulation/analytics.js';
 
 const game = (
   winnerId: string | null,

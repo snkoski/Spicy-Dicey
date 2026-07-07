@@ -6,6 +6,7 @@ const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(200),
   displayName: z.string().trim().min(1).max(30),
+  captchaToken: z.string().optional(),
 });
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string() });
@@ -34,6 +35,9 @@ export function registerAccountRoutes(app: FastifyInstance): void {
     const parsed = signupSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(400).send({ error: 'invalid signup payload' });
+    }
+    if (!(await app.captcha.verify(parsed.data.captchaToken, request.ip))) {
+      return reply.status(403).send({ error: 'captcha verification failed' });
     }
     try {
       const { user, token } = await app.accounts.signup(
@@ -106,7 +110,38 @@ export function registerAccountRoutes(app: FastifyInstance): void {
       displayName: identity.displayName,
       userId: identity.userId,
       guestSessionId: identity.guestSessionId,
+      emailVerified: identity.emailVerified,
     });
+  });
+
+  app.post('/auth/verify-email', async (request, reply) => {
+    const parsed = z.object({ token: z.string().min(1) }).safeParse(request.body);
+    if (!parsed.success || !(await app.accounts.verifyEmail(parsed.data.token))) {
+      return reply.status(400).send({ error: 'invalid or expired verification token' });
+    }
+    return reply.send({ ok: true });
+  });
+
+  app.post('/auth/request-password-reset', async (request, reply) => {
+    const parsed = z.object({ email: z.string().email() }).safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: 'invalid email' });
+    }
+    await app.accounts.requestPasswordReset(parsed.data.email);
+    return reply.send({ ok: true }); // identical response either way
+  });
+
+  app.post('/auth/reset-password', async (request, reply) => {
+    const parsed = z
+      .object({ token: z.string().min(1), newPassword: z.string().min(8).max(200) })
+      .safeParse(request.body);
+    if (
+      !parsed.success ||
+      !(await app.accounts.resetPassword(parsed.data.token, parsed.data.newPassword))
+    ) {
+      return reply.status(400).send({ error: 'invalid or expired reset token' });
+    }
+    return reply.send({ ok: true });
   });
 
   app.get('/users/me/stats', async (request, reply) => {

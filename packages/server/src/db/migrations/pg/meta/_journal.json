@@ -8,6 +8,13 @@
       "when": 1783383704513,
       "tag": "0000_fixed_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783386486410,
+      "tag": "0001_clear_synch",
+      "breakpoints": true
     }
   ]
 }

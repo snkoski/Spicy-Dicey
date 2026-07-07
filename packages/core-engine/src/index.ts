@@ -48,3 +48,14 @@ export {
 export { runGame } from './game/run-game.js';
 export { applyFarkleToBank } from './game/farkle-penalty.js';
 export type { FarkleBankState, FarkleBankResult } from './game/farkle-penalty.js';
+export { aggregateStrategyStats, SCORE_BUCKET_WIDTH } from './simulation/analytics.js';
+export type { ScoreBucket, StrategyStats } from './simulation/analytics.js';
+export { runSimulation } from './simulation/run-simulation.js';
+export type {
+  ProgressCallback,
+  RoundRobinMatrix,
+  SimStrategy,
+  SimulationConfig,
+  SimulationMode,
+  SimulationResult,
+} from './simulation/run-simulation.js';

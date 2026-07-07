@@ -8,6 +8,13 @@
       "when": 1783383704145,
       "tag": "0000_chilly_tomas",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1783386486037,
+      "tag": "0001_brave_jetstream",
+      "breakpoints": true
     }
   ]
 }

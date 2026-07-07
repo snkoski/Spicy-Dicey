@@ -115,3 +115,17 @@ export const simulationResults = pgTable('simulation_results', {
   avgFarkles: integer('avg_farkles_milli').notNull(),
   scoreDistribution: text('score_distribution').notNull(),
 });
+
+export const emailTokens = pgTable(
+  'email_tokens',
+  {
+    id: text('id').primaryKey(),
+    token: text('token').notNull(),
+    userId: text('user_id').notNull(),
+    kind: text('kind').notNull(),
+    createdAt: epochMs('created_at').notNull(),
+    expiresAt: epochMs('expires_at').notNull(),
+    usedAt: epochMs('used_at'),
+  },
+  (t) => [uniqueIndex('email_tokens_token_idx').on(t.token)],
+);

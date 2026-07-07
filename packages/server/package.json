@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
+    "@fastify/rate-limit": "^11.1.0",
+    "@fastify/static": "^9.1.3",
+    "@sentry/node": "^10.63.0",
     "@spicy-dicey/contracts": "workspace:*",
     "@spicy-dicey/core-engine": "workspace:*",
     "bcryptjs": "^3.0.3",
