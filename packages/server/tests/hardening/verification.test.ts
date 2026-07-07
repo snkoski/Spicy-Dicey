@@ -146,3 +146,22 @@ describe('captcha gate (Turnstile behind an interface)', () => {
     expect(res.statusCode).toBe(403);
   });
 });
+
+describe('auth rate limiting', () => {
+  it('a burst of logins gets 429s', async () => {
+    const app = buildApp({ database: ':memory:', authRateLimitMax: 5 });
+    const statuses: number[] = [];
+    for (let i = 0; i < 10; i += 1) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/auth/login',
+        payload: { email: 'x@example.com', password: 'nope-nope' },
+      });
+      statuses.push(res.statusCode);
+    }
+    expect(statuses).toContain(429);
+    // non-auth endpoints stay unthrottled
+    const health = await app.inject({ method: 'GET', url: '/health' });
+    expect(health.statusCode).toBe(200);
+  });
+});

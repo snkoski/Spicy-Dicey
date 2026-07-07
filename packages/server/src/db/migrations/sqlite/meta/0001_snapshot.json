@@ -46,9 +46,7 @@
       "indexes": {
         "auth_sessions_token_idx": {
           "name": "auth_sessions_token_idx",
-          "columns": [
-            "session_token"
-          ],
+          "columns": ["session_token"],
           "isUnique": true
         }
       },
@@ -113,9 +111,7 @@
       "indexes": {
         "email_tokens_token_idx": {
           "name": "email_tokens_token_idx",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         }
       },
@@ -209,9 +205,7 @@
       "indexes": {
         "game_players_user_id_idx": {
           "name": "game_players_user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -318,9 +312,7 @@
       "indexes": {
         "games_room_code_idx": {
           "name": "games_room_code_idx",
-          "columns": [
-            "room_code"
-          ],
+          "columns": ["room_code"],
           "isUnique": false
         }
       },
@@ -378,16 +370,12 @@
       "indexes": {
         "guest_sessions_token_idx": {
           "name": "guest_sessions_token_idx",
-          "columns": [
-            "session_token"
-          ],
+          "columns": ["session_token"],
           "isUnique": true
         },
         "guest_sessions_expires_at_idx": {
           "name": "guest_sessions_expires_at_idx",
-          "columns": [
-            "expires_at"
-          ],
+          "columns": ["expires_at"],
           "isUnique": false
         }
       },
@@ -673,9 +661,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

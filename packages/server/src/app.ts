@@ -11,6 +11,7 @@ import { createSqliteDb, type AppDb } from './db/client.js';
 import { createDbSessionStore, startGuestPurgeJob } from './db/session-store.js';
 import { registerAccountRoutes } from './routes/accounts.js';
 import { registerAuthRoutes } from './routes/auth.js';
+import { registerSimulationRoutes } from './routes/simulations.js';
 import { registerStrategyRoutes } from './routes/strategies.js';
 
 declare module 'fastify' {
@@ -64,10 +65,15 @@ export function buildApp(options: BuildAppOptions = {}) {
   const stopPurge = startGuestPurgeJob(db);
   app.addHook('onClose', () => stopPurge());
 
-  app.get('/health', (): HealthResponse => ({ status: 'ok' }));
-  registerAuthRoutes(app);
-  registerAccountRoutes(app);
-  registerStrategyRoutes(app);
+  // Routes register after plugins are loaded so the rate limiter is live
+  // before the /auth/* routes exist (its onRoute hook must see them).
+  app.after(() => {
+    app.get('/health', (): HealthResponse => ({ status: 'ok' }));
+    registerAuthRoutes(app);
+    registerAccountRoutes(app);
+    registerStrategyRoutes(app);
+    registerSimulationRoutes(app);
+  });
 
   return app;
 }

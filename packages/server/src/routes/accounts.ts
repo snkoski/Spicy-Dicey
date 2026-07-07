@@ -135,7 +135,10 @@ export function registerAccountRoutes(app: FastifyInstance): void {
     const parsed = z
       .object({ token: z.string().min(1), newPassword: z.string().min(8).max(200) })
       .safeParse(request.body);
-    if (!parsed.success || !(await app.accounts.resetPassword(parsed.data.token, parsed.data.newPassword))) {
+    if (
+      !parsed.success ||
+      !(await app.accounts.resetPassword(parsed.data.token, parsed.data.newPassword))
+    ) {
       return reply.status(400).send({ error: 'invalid or expired reset token' });
     }
     return reply.send({ ok: true });
