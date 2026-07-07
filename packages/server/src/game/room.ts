@@ -32,10 +32,34 @@ interface RoomMember {
   graceTimer: NodeJS.Timeout | null;
 }
 
+export interface FinishedGamePlayer {
+  identity: string;
+  displayName: string;
+  seatIndex: number;
+  finalScore: number;
+  placement: number;
+  farkleCount: number;
+  turnCount: number;
+}
+
+/** Everything persistence needs when a game ends (plan §3 games/game_players). */
+export interface FinishedGameSummary {
+  roomCode: string;
+  createdBy: string;
+  rulesetConfig: RoomCreateInput['rulesetConfig'];
+  turnTimerSec: RoomCreateInput['turnTimerSec'];
+  spectatorChatEnabled: boolean;
+  winnerId: string | null;
+  finished: boolean;
+  finishedAt: number;
+  players: FinishedGamePlayer[];
+}
+
 interface RoomDeps {
   rng: RandomSource;
   chatFilter?: ChatFilter;
   now?: () => number;
+  onGameFinished?: (summary: FinishedGameSummary) => void;
 }
 
 /**
@@ -52,6 +76,7 @@ export class Room {
   private readonly rng: RandomSource;
   private readonly chatFilter: ChatFilter;
   private readonly now: () => number;
+  private readonly onGameFinished: ((summary: FinishedGameSummary) => void) | undefined;
   private readonly members = new Map<string, RoomMember>();
   private match: MatchState | null = null;
   private turnTimer: NodeJS.Timeout | null = null;
@@ -71,6 +96,7 @@ export class Room {
     this.rng = deps.rng;
     this.chatFilter = deps.chatFilter ?? createChatFilter();
     this.now = deps.now ?? Date.now;
+    this.onGameFinished = deps.onGameFinished;
   }
 
   /** Current turn phase, for thin handlers routing roll vs roll-again. */
@@ -314,6 +340,25 @@ export class Room {
           winnerId: ended.winnerId,
           finalScores: ended.finalScores,
           placements: ended.placements,
+        });
+        this.onGameFinished?.({
+          roomCode: this.code,
+          createdBy: this.hostIdentity,
+          rulesetConfig: this.config.rulesetConfig,
+          turnTimerSec: this.config.turnTimerSec,
+          spectatorChatEnabled: this.config.spectatorChatEnabled,
+          winnerId: ended.winnerId,
+          finished: this.match.finished,
+          finishedAt: this.now(),
+          players: this.match.players.map((p, seatIndex) => ({
+            identity: p.id,
+            displayName: this.members.get(p.id)?.displayName ?? p.id,
+            seatIndex,
+            finalScore: p.total,
+            placement: ended.placements.indexOf(p.id) + 1,
+            farkleCount: p.farkles,
+            turnCount: p.turns,
+          })),
         });
       }
     }

@@ -106,7 +106,10 @@ export function createAccountService(db: AppDb, options: AccountServiceOptions =
         .select()
         .from(schema.authSessions)
         .where(
-          and(eq(schema.authSessions.sessionToken, token), gt(schema.authSessions.expiresAt, now())),
+          and(
+            eq(schema.authSessions.sessionToken, token),
+            gt(schema.authSessions.expiresAt, now()),
+          ),
         )
         .limit(1);
       if (!session) {
@@ -163,7 +166,9 @@ export function createAccountService(db: AppDb, options: AccountServiceOptions =
       const rows = await db
         .select()
         .from(schema.gamePlayers)
-        .where(and(eq(schema.gamePlayers.userId, userId), isNotNull(schema.gamePlayers.finalScore)));
+        .where(
+          and(eq(schema.gamePlayers.userId, userId), isNotNull(schema.gamePlayers.finalScore)),
+        );
       const gamesPlayed = rows.length;
       const wins = rows.filter((r) => r.placement === 1).length;
       const scoreSum = rows.reduce((sum, r) => sum + (r.finalScore ?? 0), 0);

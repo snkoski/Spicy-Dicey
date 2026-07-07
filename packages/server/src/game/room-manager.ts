@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid';
 import { createCryptoRandom, type RandomSource } from '@spicy-dicey/core-engine';
 import type { RoomCreateInput } from '@spicy-dicey/contracts';
-import { Room, type RoomOutbox } from './room.js';
+import { Room, type FinishedGameSummary, type RoomOutbox } from './room.js';
 
 const generateCode = customAlphabet('ABCDEFGHJKMNPQRSTUVWXYZ23456789', 6);
 
@@ -14,9 +14,14 @@ export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly memberIndex = new Map<string, string>(); // identity -> roomCode
   private readonly makeRng: () => RandomSource;
+  private readonly onGameFinished: ((summary: FinishedGameSummary) => void) | undefined;
 
-  constructor(makeRng: () => RandomSource = createCryptoRandom) {
+  constructor(
+    makeRng: () => RandomSource = createCryptoRandom,
+    onGameFinished?: (summary: FinishedGameSummary) => void,
+  ) {
     this.makeRng = makeRng;
+    this.onGameFinished = onGameFinished;
   }
 
   create(
@@ -28,7 +33,10 @@ export class RoomManager {
     while (this.rooms.has(code)) {
       code = generateCode();
     }
-    const room = new Room(code, hostIdentity, config, outboxFor(code), { rng: this.makeRng() });
+    const room = new Room(code, hostIdentity, config, outboxFor(code), {
+      rng: this.makeRng(),
+      ...(this.onGameFinished ? { onGameFinished: this.onGameFinished } : {}),
+    });
     this.rooms.set(code, room);
     return room;
   }

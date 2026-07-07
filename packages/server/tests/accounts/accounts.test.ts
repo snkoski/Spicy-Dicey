@@ -90,12 +90,7 @@ describe('guest -> full upgrade (decision 6)', () => {
       },
     ]);
 
-    const upgraded = await accounts.upgradeGuest(
-      guest.token,
-      'ann@example.com',
-      'hunter22',
-      'Ann',
-    );
+    const upgraded = await accounts.upgradeGuest(guest.token, 'ann@example.com', 'hunter22', 'Ann');
     expect(upgraded).not.toBeNull();
 
     const players = await db.select().from(schema.gamePlayers);
