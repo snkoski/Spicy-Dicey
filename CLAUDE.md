@@ -2,6 +2,8 @@
 
 Farkle / Hot Dice platform. The full spec — phased roadmap, acceptance criteria, DB schema, API/socket contracts, and the decision log — lives in `spicy-dicey-project-plan.md` at the repo root. Consult it for _what_ to build. This file is for _how to operate_ in this repo, every session.
 
+**All six plan phases are implemented (v1.0.0).** `PROJECT_STATE.md` is the orientation document for new sessions: current architecture, decisions made during the build, testing/CI topology, operational gotchas, and what remains. Read it before starting work.
+
 ## Core invariant (never violate)
 
 `core-engine` is the sole source of truth for dice, scoring, and strategy evaluation. It is consumed identically by the simulator and the live server. No dice/scoring/RNG logic exists anywhere else in the repo — not in `server`, not in `client`. If you find yourself duplicating rules logic outside `core-engine`, stop and refactor instead of continuing.
