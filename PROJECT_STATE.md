@@ -92,10 +92,11 @@ in more detail.
 - **Config surface exceeds A.1.1.** `RulesetConfig` also carries
   `singleOneValue`, `singleFiveValue`, `threeOfAKindFaceMultiplier` because the
   engine's CLAUDE.md forbids _any_ hardcoded scoring value.
-- **Max interpretation includes same-face partitions.** Four kept 1s = three-1s
-  - a single 1 = 1100, beating flat 4-of-a-kind (1000). Found while designing
-    the property-test oracle; the oracle (`tests/scoring/properties.test.ts`)
-    checks engine == brute-force best partition, not just an upper bound.
+- **Max interpretation includes same-face partitions.** Four kept 1s score as
+  three-1s plus a single 1 (1100), beating flat 4-of-a-kind (1000). Found while
+  designing the property-test oracle; the oracle
+  (`tests/scoring/properties.test.ts`) checks engine == brute-force best
+  partition, not just an upper bound.
 - **Three pairs is strictly three distinct face-pairs** (2/2/2). A 4-oak + pair
   is not three pairs; making it one later is a new config toggle.
 - **Greedy never banks**, so the game runner/match reducer has a
